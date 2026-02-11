@@ -1,36 +1,62 @@
 # src/domain/indicators.py
-import pandas as pd
 
+import pandas as pd
+import numpy as np
+
+def _ensure_flat_columns(df):
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [c[0] for c in df.columns]
+    df.columns = [str(c).lower() for c in df.columns]
+    return df
 
 def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
+    """
+    Add core technical indicators to OHLCV dataframe.
 
-    # EMA
-    df["ema_20"] = df["close"].ewm(span=20).mean()
-    df["ema_50"] = df["close"].ewm(span=50).mean()
+    Required columns:
+        date, open, high, low, close, volume
+    """
 
-    # RSI
-    delta = df["close"].diff()
-    gain = delta.clip(lower=0).rolling(14).mean()
-    loss = -delta.clip(upper=0).rolling(14).mean()
-    rs = gain / loss
-    df["rsi"] = 100 - (100 / (1 + rs))
+    data = df.copy()
 
-    # MACD
-    ema12 = df["close"].ewm(span=12).mean()
-    ema26 = df["close"].ewm(span=26).mean()
-    df["macd"] = ema12 - ema26
-    df["macd_signal"] = df["macd"].ewm(span=9).mean()
+    # -----------------------------
+    # EMA (trend)
+    # -----------------------------
+    data["ema_20"] = data["close"].ewm(span=20, adjust=False).mean()
+    data["ema_50"] = data["close"].ewm(span=50, adjust=False).mean()
 
-    # ATR (14)
-    high_low = df["high"] - df["low"]
-    high_close = (df["high"] - df["close"].shift()).abs()
-    low_close = (df["low"] - df["close"].shift()).abs()
+    # -----------------------------
+    # RSI (momentum)
+    # -----------------------------
+    delta = data["close"].diff()
 
-    true_range = pd.concat(
-        [high_low, high_close, low_close], axis=1
-    ).max(axis=1)
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
 
-    df["atr"] = true_range.rolling(14).mean()
+    avg_gain = gain.rolling(14).mean()
+    avg_loss = loss.rolling(14).mean()
 
-    return df
+    rs = avg_gain / (avg_loss + 1e-9)
+    data["rsi"] = 100 - (100 / (1 + rs))
+
+    # -----------------------------
+    # MACD (trend + momentum)
+    # -----------------------------
+    ema_12 = data["close"].ewm(span=12, adjust=False).mean()
+    ema_26 = data["close"].ewm(span=26, adjust=False).mean()
+
+    data["macd"] = ema_12 - ema_26
+    data["macd_signal"] = data["macd"].ewm(span=9, adjust=False).mean()
+    data["macd_hist"] = data["macd"] - data["macd_signal"]
+
+    # -----------------------------
+    # ATR (volatility)
+    # -----------------------------
+    high_low = data["high"] - data["low"]
+    high_close = (data["high"] - data["close"].shift()).abs()
+    low_close = (data["low"] - data["close"].shift()).abs()
+
+    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    data["atr"] = tr.rolling(14).mean()
+
+    return data

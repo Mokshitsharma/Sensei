@@ -1,35 +1,40 @@
 # src/domain/fundamentals.py
-from typing import Dict, Any
+
+from typing import Dict
 import yfinance as yf
 
 
-def get_fundamentals(ticker: str) -> Dict[str, Any]:
+def load_fundamentals(ticker: str) -> Dict[str, float]:
     """
-    Fetch fundamental metrics for Indian stocks.
+    Load key fundamental metrics for a stock.
 
-    Returns:
-    {
-        "pe": float | None,
-        "roe": float | None,
-        "eps": float | None,
-    }
+    Returns ML-friendly numeric dictionary.
     """
-
-    if not ticker.endswith(".NS") and not ticker.endswith(".BO"):
-        ticker = f"{ticker}.NS"
 
     stock = yf.Ticker(ticker)
-    info = stock.info or {}
+    info = stock.info
 
-    pe = info.get("trailingPE")
-    eps = info.get("trailingEps")
+    def _safe(key: str, default: float = 0.0) -> float:
+        val = info.get(key, default)
+        return float(val) if val is not None else default
 
-    roe = info.get("returnOnEquity")
-    if roe is not None:
-        roe = roe * 100  # convert to %
+    fundamentals = {
+        # --- Price ---
+        "current_price": _safe("currentPrice"),
 
-    return {
-        "pe": round(pe, 2) if isinstance(pe, (int, float)) else None,
-        "eps": round(eps, 2) if isinstance(eps, (int, float)) else None,
-        "roe": round(roe, 2) if isinstance(roe, (int, float)) else None,
+        # --- Valuation ---
+        "market_cap": _safe("marketCap"),
+        "book_value": _safe("bookValue"),
+
+        # --- Balance Sheet ---
+        "debt_to_equity": _safe("debtToEquity"),
+
+        # --- Profitability ---
+        "roe": _safe("returnOnEquity"),
+
+        # --- Risk / Range ---
+        "52_week_high": _safe("fiftyTwoWeekHigh"),
+        "52_week_low": _safe("fiftyTwoWeekLow"),
     }
+
+    return fundamentals

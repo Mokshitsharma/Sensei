@@ -1,68 +1,119 @@
 # src/domain/patterns.py
+
 import pandas as pd
 from typing import List, Dict
 
 
-def detect_patterns(
-    df: pd.DataFrame,
-    lookback: int = 60,
-) -> List[Dict]:
+def detect_patterns(df: pd.DataFrame) -> List[Dict]:
     """
-    Detects recent technical patterns and returns event markers.
+    Detect classical technical patterns.
 
-    Returns:
-    [
+    Returns a list of pattern events:
         {
-            "type": "golden_cross" | "death_cross" | "breakout",
             "date": pd.Timestamp,
-            "price": float,
+            "type": str,
+            "strength": float
         }
-    ]
     """
 
-    events = []
+    patterns: List[Dict] = []
 
-    if len(df) < lookback:
-        return events
+    if len(df) < 50:
+        return patterns
 
-    recent = df.tail(lookback).reset_index(drop=True)
+    data = df.copy()
 
-    # EMA crosses
-    for i in range(1, len(recent)):
-        prev = recent.iloc[i - 1]
-        curr = recent.iloc[i]
+    # -----------------------------
+    # Golden / Death Cross
+    # -----------------------------
+    if "ema_20" in data.columns and "ema_50" in data.columns:
+        prev = data.iloc[-2]
+        curr = data.iloc[-1]
 
-        # Golden Cross
         if prev["ema_20"] < prev["ema_50"] and curr["ema_20"] > curr["ema_50"]:
-            events.append(
+            patterns.append(
                 {
+                    "date": curr["date"],
                     "type": "golden_cross",
-                    "date": curr["date"],
-                    "price": curr["close"],
+                    "strength": 0.8,
                 }
             )
 
-        # Death Cross
         if prev["ema_20"] > prev["ema_50"] and curr["ema_20"] < curr["ema_50"]:
-            events.append(
+            patterns.append(
                 {
-                    "type": "death_cross",
                     "date": curr["date"],
-                    "price": curr["close"],
+                    "type": "death_cross",
+                    "strength": 0.8,
                 }
             )
 
-    # Breakouts (20-day high)
-    rolling_high = recent["high"].rolling(20).max()
+    # -----------------------------
+    # Breakout / Breakdown
+    # -----------------------------
+    lookback = 20
+    recent = data.iloc[-lookback:]
 
-    for i in range(20, len(recent)):
-        if recent.iloc[i]["close"] > rolling_high.iloc[i - 1]:
-            events.append(
+    high_range = recent["high"].max()
+    low_range = recent["low"].min()
+    last_close = data.iloc[-1]["close"]
+
+    if last_close > high_range:
+        patterns.append(
+            {
+                "date": data.iloc[-1]["date"],
+                "type": "breakout",
+                "strength": 0.7,
+            }
+        )
+
+    if last_close < low_range:
+        patterns.append(
+            {
+                "date": data.iloc[-1]["date"],
+                "type": "breakdown",
+                "strength": 0.7,
+            }
+        )
+
+    # -----------------------------
+    # Simple Candlestick Patterns
+    # -----------------------------
+    candle = data.iloc[-1]
+    body = abs(candle["close"] - candle["open"])
+    range_ = candle["high"] - candle["low"]
+
+    if range_ > 0:
+        body_ratio = body / range_
+
+        # Doji
+        if body_ratio < 0.1:
+            patterns.append(
                 {
-                    "type": "breakout",
-                    "date": recent.iloc[i]["date"],
-                    "price": recent.iloc[i]["close"],
+                    "date": candle["date"],
+                    "type": "doji",
+                    "strength": 0.4,
                 }
             )
 
-    return events
+        # Strong bullish candle
+        if candle["close"] > candle["open"] and body_ratio > 0.7:
+            patterns.append(
+                {
+                    "date": candle["date"],
+                    "type": "bullish_engulfing",
+                    "strength": 0.6,
+                }
+            )
+
+        # Strong bearish candle
+        if candle["close"] < candle["open"] and body_ratio > 0.7:
+            patterns.append(
+                {
+                    "date": candle["date"],
+                    "type": "bearish_engulfing",
+                    "strength": 0.6,
+                }
+            )
+
+    return patterns

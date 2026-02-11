@@ -1,14 +1,14 @@
 # src/data/prices.py
+
 import pandas as pd
-import yfinance as yf
 
-REQUIRED_COLUMNS = ["date", "open", "high", "low", "close", "volume"]
+from src.data.providers.nse import NSEProvider
+from src.data.providers.yahoo import YahooProvider
+from src.utils.logger import get_logger
 
+logger = get_logger("prices")
 
-def _flatten_columns(df: pd.DataFrame) -> pd.DataFrame:
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
-    return df
+REQUIRED_COLUMNS = ["open", "high", "low", "close", "volume"]
 
 
 def load_prices(
@@ -16,55 +16,35 @@ def load_prices(
     timeframe: str,
 ) -> pd.DataFrame:
     """
-    Loads price data for Indian stocks with daily or intraday support.
+    Load OHLCV prices using provider abstraction.
     """
 
-    if not ticker.endswith(".NS") and not ticker.endswith(".BO"):
-        ticker = f"{ticker}.NS"
+    nse = NSEProvider()
+    yahoo = YahooProvider()
 
-    if timeframe in ("5m", "15m"):
-        df = yf.download(
-            ticker,
-            interval=timeframe,
-            period="60d",
-            auto_adjust=False,
-            progress=False,
-        )
+    # -----------------------------
+    # Intraday → fallback only
+    # -----------------------------
+    if timeframe.endswith(("m", "h")):
+        logger.warning("Intraday NSE data not supported reliably. Using Yahoo.")
+        df = yahoo.fetch_intraday_ohlcv(ticker, timeframe)
+
+    # -----------------------------
+    # Daily → NSE primary
+    # -----------------------------
     else:
-        df = yf.download(
-            ticker,
-            period=timeframe,
-            interval="1d",
-            auto_adjust=False,
-            progress=False,
-        )
+        df = nse.fetch_daily_ohlcv(ticker)
+
+        if df.empty:
+            logger.warning("NSE failed, falling back to Yahoo")
+            df = yahoo.fetch_daily_ohlcv(ticker)
 
     if df.empty:
-        raise ValueError("No price data returned")
+        raise ValueError(f"No price data available for {ticker}")
 
-    df = _flatten_columns(df)
-    df = df.reset_index()
-
-    df.columns = [str(c).lower().replace(" ", "_") for c in df.columns]
-
-    rename_map = {
-        "datetime": "date",
-        "date": "date",
-        "open": "open",
-        "high": "high",
-        "low": "low",
-        "close": "close",
-        "volume": "volume",
-    }
-
-    df = df.rename(columns=rename_map)
-
-    missing = set(REQUIRED_COLUMNS) - set(df.columns)
+    missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
     if missing:
-        raise ValueError(f"Missing columns: {missing}")
+        raise ValueError(f"Missing OHLCV columns: {missing}")
 
-    df = df[REQUIRED_COLUMNS]
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values("date").reset_index(drop=True)
-
+    logger.info(f"Loaded {len(df)} rows for {ticker}")
     return df

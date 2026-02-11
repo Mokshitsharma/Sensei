@@ -1,79 +1,110 @@
 # src/domain/signals.py
+
 from typing import Dict, List
 
 
 def generate_signal(
     indicators: Dict[str, float],
-    patterns: List[dict],
+    patterns: List[Dict],
     fundamentals: Dict[str, float],
 ) -> Dict[str, object]:
-    score = 0
-    reasons: List[str] = []
+    """
+    Generate rule-based trading signal.
 
-    # ---------------------------
-    # RSI
-    # ---------------------------
-    rsi = indicators["rsi"]
+    Returns:
+        {
+            "action": BUY | SELL | HOLD,
+            "confidence": float (0-1),
+            "explanation": str
+        }
+    """
+
+    score = 0.0
+    reasons = []
+
+    # -----------------------------
+    # Indicator-based rules
+    # -----------------------------
+    rsi = indicators.get("rsi", 50)
+
     if rsi < 30:
-        score += 2
-        reasons.append("RSI indicates oversold conditions")
+        score += 1.0
+        reasons.append("RSI oversold")
+
     elif rsi > 70:
-        score -= 2
-        reasons.append("RSI indicates overbought conditions")
+        score -= 1.0
+        reasons.append("RSI overbought")
 
-    # ---------------------------
-    # MACD
-    # ---------------------------
-    if indicators["macd"] > indicators["macd_signal"]:
-        score += 1
-        reasons.append("MACD is bullish")
+    macd = indicators.get("macd", 0)
+    macd_signal = indicators.get("macd_signal", 0)
+
+    if macd > macd_signal:
+        score += 0.5
+        reasons.append("MACD bullish crossover")
+
     else:
-        score -= 1
-        reasons.append("MACD is bearish")
+        score -= 0.5
+        reasons.append("MACD bearish crossover")
 
-    # ---------------------------
-    # Patterns
-    # ---------------------------
-    for event in patterns:
-        if event["type"] == "golden_cross":
-            score += 2
-            reasons.append("Golden Cross detected")
-        elif event["type"] == "death_cross":
-            score -= 2
-            reasons.append("Death Cross detected")
-        elif event["type"] == "breakout":
-            score += 1
-            reasons.append("Price breakout detected")
+    # -----------------------------
+    # Pattern-based rules
+    # -----------------------------
+    for p in patterns:
+        p_type = p["type"]
+        strength = p.get("strength", 0.5)
 
-    # ---------------------------
-    # Fundamentals
-    # ---------------------------
-    if fundamentals.get("pe") and fundamentals["pe"] < 25:
-        score += 1
-        reasons.append("Reasonable PE valuation")
+        if p_type in ("golden_cross", "breakout", "bullish_engulfing"):
+            score += strength
+            reasons.append(p_type.replace("_", " ").title())
 
-    if fundamentals.get("roe") and fundamentals["roe"] > 15:
-        score += 1
+        if p_type in ("death_cross", "breakdown", "bearish_engulfing"):
+            score -= strength
+            reasons.append(p_type.replace("_", " ").title())
+
+    # -----------------------------
+    # Fundamental sanity checks
+    # -----------------------------
+    price = fundamentals.get("current_price", 0)
+    high_52 = fundamentals.get("52_week_high", price)
+    low_52 = fundamentals.get("52_week_low", price)
+
+    if price <= low_52 * 1.05:
+        score += 0.5
+        reasons.append("Near 52-week low")
+
+    if price >= high_52 * 0.95:
+        score -= 0.5
+        reasons.append("Near 52-week high")
+
+    debt_to_equity = fundamentals.get("debt_to_equity", 0)
+
+    if debt_to_equity > 2:
+        score -= 0.5
+        reasons.append("High leverage")
+
+    roe = fundamentals.get("roe", 0)
+
+    if roe > 0.15:
+        score += 0.5
         reasons.append("Strong ROE")
 
-    # ---------------------------
-    # Final Signal
-    # ---------------------------
-    if score >= 4:
-        signal = "BUY"
-    elif score <= -2:
-        signal = "SELL"
+    # -----------------------------
+    # Final decision
+    # -----------------------------
+    if score >= 1.5:
+        action = "BUY"
+    elif score <= -1.5:
+        action = "SELL"
     else:
-        signal = "HOLD"
+        action = "HOLD"
 
-    # ---------------------------
-    # Confidence (bounded)
-    # ---------------------------
-    confidence = min(90, max(30, abs(score) * 15))
+    confidence = min(abs(score) / 3.0, 1.0)
+
+    explanation = "; ".join(reasons) if reasons else "No strong signals"
 
     return {
-        "signal": signal,
-        "score": score,
-        "confidence": confidence,
-        "reasons": reasons,
+        "action": action,
+        "confidence": round(confidence, 2),
+        "score": round(score, 2),
+        "explanation": explanation,
     }
