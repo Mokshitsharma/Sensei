@@ -7,61 +7,54 @@ def make_final_decision(
     signals: Dict[str, float],
     news_sentiment: float,
 ) -> Dict[str, object]:
-    """
-    Combine ML, DL, RL, regime, and news signals
-    into a final BUY / SELL / HOLD decision.
-    """
 
     score = 0.0
     explanation = []
 
-    # -----------------------------
-    # ML probability
-    # -----------------------------
-    if signals["ml_prob_up"] > 0.6:
+    ml_prob = signals.get("ml_prob_up", 0.5)
+    lstm_return = signals.get("lstm_return", 0.0)
+    tcn_return = signals.get("tcn_return", 0.0)
+    regime = signals.get("regime", "NEUTRAL")
+    ppo_action = signals.get("ppo_action", "HOLD")
+
+    # ML
+    if ml_prob > 0.6:
         score += 1
         explanation.append("ML model is bullish")
-    elif signals["ml_prob_up"] < 0.4:
+    elif ml_prob < 0.4:
         score -= 1
         explanation.append("ML model is bearish")
 
-    # -----------------------------
-    # LSTM / TCN returns
-    # -----------------------------
-    if signals["lstm_return"] > 0:
+    # LSTM
+    if lstm_return > 0:
         score += 1
         explanation.append("LSTM predicts positive return")
     else:
         score -= 1
         explanation.append("LSTM predicts negative return")
 
-    if signals["tcn_return"] > 0:
+    # TCN
+    if tcn_return > 0:
         score += 0.5
         explanation.append("TCN confirms upside")
 
-    # -----------------------------
     # Regime
-    # -----------------------------
-    if signals["regime"] == "BULL":
+    if regime == "BULL":
         score += 1
         explanation.append("Market regime is bullish")
-    elif signals["regime"] == "BEAR":
+    elif regime == "BEAR":
         score -= 1
         explanation.append("Market regime is bearish")
 
-    # -----------------------------
-    # PPO agent
-    # -----------------------------
-    if signals["ppo_action"] == "BUY":
+    # PPO
+    if ppo_action == "BUY":
         score += 1
         explanation.append("RL agent suggests BUY")
-    elif signals["ppo_action"] == "SELL":
+    elif ppo_action == "SELL":
         score -= 1
         explanation.append("RL agent suggests SELL")
 
-    # -----------------------------
-    # News sentiment
-    # -----------------------------
+    # News
     if news_sentiment > 0.2:
         score += 1
         explanation.append("Positive news sentiment")
@@ -69,9 +62,6 @@ def make_final_decision(
         score -= 1
         explanation.append("Negative news sentiment")
 
-    # -----------------------------
-    # Final Decision
-    # -----------------------------
     if score >= 2:
         action = "BUY"
     elif score <= -2:
@@ -85,5 +75,5 @@ def make_final_decision(
         "action": action,
         "confidence": confidence,
         "score": score,
-        "explanation": " | ".join(explanation),
+        "explanation": " | ".join(explanation) or "Mixed signals",
     }

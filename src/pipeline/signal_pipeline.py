@@ -16,6 +16,7 @@ from src.dl.temporal_cnn import load_model as load_tcn
 from src.regimes.hmm import MarketRegimeHMM
 from src.rl.agent import PPOTradingAgent
 from src.rl.env import TradingEnv
+import numpy as np
 
 
 def run_signal_pipeline(
@@ -31,6 +32,10 @@ def run_signal_pipeline(
 
     Returns all intermediate signals required by decision_engine.
     """
+
+    # Clean data
+    price_df = price_df.replace([np.inf, -np.inf], np.nan)
+    price_df = price_df.fillna(0)
 
     # -----------------------------
     # Indicators
@@ -101,6 +106,12 @@ def run_signal_pipeline(
 
     agent = PPOTradingAgent(env, model_path=ppo_model_path)
     obs = env.reset()
+   
+    obs = np.array(obs, dtype=np.float32)
+
+    # Replace NaN / inf
+    obs = np.nan_to_num(obs, nan=0.0, posinf=0.0, neginf=0.0)
+
     ppo_action = agent.act(obs)
 
     return {

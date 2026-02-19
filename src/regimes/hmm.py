@@ -3,88 +3,85 @@
 import numpy as np
 import pandas as pd
 from hmmlearn.hmm import GaussianHMM
-from typing import Dict
 
 
 class MarketRegimeHMM:
     """
-    Hidden Markov Model for market regime detection.
-
-    Regimes (learned, not hard-coded):
-        - Bull
-        - Bear
-        - Sideways
+    Hidden Markov Model for detecting market regimes.
     """
 
-    def __init__(
-        self,
-        n_states: int = 3,
-        covariance_type: str = "full",
-        n_iter: int = 1000,
-        random_state: int = 42,
-    ) -> None:
-        self.n_states = n_states
+    def __init__(self, n_components=2):
         self.model = GaussianHMM(
-            n_components=n_states,
-            covariance_type=covariance_type,
-            n_iter=n_iter,
-            random_state=random_state,
+            n_components=n_components,
+            covariance_type="diag",   # ← IMPORTANT FIX
+            n_iter=200,
+            random_state=42,
         )
-        self.state_map: Dict[int, str] = {}
+        self.fitted = False
 
-    def _prepare_features(self, df: pd.DataFrame) -> np.ndarray:
-        """
-        Features:
-            - log return
-            - rolling volatility
-        """
-        data = df.copy()
+    # =====================================================
+    # FIT MODEL
+    # =====================================================
+    def fit(self, df: pd.DataFrame):
 
-        data["log_return"] = np.log(data["close"] / data["close"].shift(1))
-        data["volatility"] = data["log_return"].rolling(10).std()
+        if df is None or len(df) < 30:
+            raise ValueError("Not enough data to fit HMM")
 
-        features = data[["log_return", "volatility"]].dropna()
-        return features.values
+        # ------------------------------------------
+        # Use returns ONLY (stationary series)
+        # ------------------------------------------
+        if "close" in df.columns:
+            returns = df["close"].pct_change()
+        elif "Close" in df.columns:
+            returns = df["Close"].pct_change()
+        else:
+            raise ValueError("No close column found for HMM")
 
-    def fit(self, df: pd.DataFrame) -> None:
-        """
-        Fit HMM and infer regime labels.
-        """
-        X = self._prepare_features(df)
+        returns = returns.dropna()
+
+        # Remove extreme outliers (stability)
+        returns = returns[abs(returns) < 0.5]
+
+        if len(returns) < 20:
+            raise ValueError("Insufficient clean return samples for HMM")
+
+        X = returns.values.reshape(-1, 1)
+
+        # Add tiny noise to prevent singular covariance
+        X = X + 1e-6 * np.random.randn(*X.shape)
+
         self.model.fit(X)
+        self.fitted = True
 
-        hidden_states = self.model.predict(X)
+    # =====================================================
+    # PREDICT REGIME
+    # =====================================================
+    def predict(self, df: pd.DataFrame):
 
-        regime_stats = {}
-        for state in range(self.n_states):
-            returns = X[hidden_states == state, 0]
-            regime_stats[state] = returns.mean()
+        if not self.fitted:
+            raise ValueError("HMM model not fitted")
 
-        sorted_states = sorted(
-            regime_stats.items(), key=lambda x: x[1]
-        )
+        if "close" in df.columns:
+            returns = df["close"].pct_change()
+        elif "Close" in df.columns:
+            returns = df["Close"].pct_change()
+        else:
+            raise ValueError("No close column found for HMM")
 
-        self.state_map = {
-            sorted_states[0][0]: "BEAR",
-            sorted_states[1][0]: "SIDEWAYS",
-            sorted_states[2][0]: "BULL",
-        }
+        returns = returns.dropna()
+        returns = returns[abs(returns) < 0.5]
 
-    def predict(self, df: pd.DataFrame) -> str:
-        """
-        Predict current market regime.
-        """
-        X = self._prepare_features(df)
-        state = self.model.predict(X)[-1]
-        return self.state_map.get(state, "UNKNOWN")
+        X = returns.values.reshape(-1, 1)
 
-    def predict_series(self, df: pd.DataFrame) -> pd.Series:
-        """
-        Predict regime for each timestep.
-        """
-        X = self._prepare_features(df)
         states = self.model.predict(X)
-        regimes = [self.state_map[s] for s in states]
 
-        index = df.index[-len(regimes):]
-        return pd.Series(regimes, index=index, name="regime")
+        # Assume higher mean return state = BULL
+        means = self.model.means_.flatten()
+
+        bull_state = np.argmax(means)
+        current_state = states[-1]
+
+        if current_state == bull_state:
+            return "BULL"
+        else:
+            return "BEAR"

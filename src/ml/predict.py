@@ -15,26 +15,18 @@ def predict_next_week(
 ) -> Dict[str, float]:
     """
     Predict next-week price movement using classical ML.
-
-    Args:
-        df: Feature dataframe (output of build_features)
-        company: Company name (for metadata / logging)
-        model_name: Saved ML model name
-        task: regression | classification
-
-    Returns:
-        {
-            "prediction": float,
-            "direction": UP | DOWN,
-            "confidence": float (0-100)
-        }
+    If model not found, return neutral prediction.
     """
 
-    model = load_model(model_name)
+    try:
+        model = load_model(model_name)
+    except Exception:
+        return {
+            "prediction": 0.0,
+            "direction": "NEUTRAL",
+            "confidence": 0.0,
+        }
 
-    # -----------------------------
-    # Prepare input
-    # -----------------------------
     feature_cols = [
         c for c in df.columns
         if c not in (
@@ -45,10 +37,6 @@ def predict_next_week(
     ]
 
     latest_X = df[feature_cols].iloc[-1:].values
-
-    # -----------------------------
-    # Prediction
-    # -----------------------------
     y_pred = predict(model, latest_X)[0]
 
     if task == "classification":
@@ -56,7 +44,6 @@ def predict_next_week(
         confidence = prob * 100
         direction = "UP" if prob >= 0.5 else "DOWN"
         prediction = prob
-
     else:
         direction = "UP" if y_pred > 0 else "DOWN"
         confidence = min(abs(y_pred) * 100, 100)

@@ -11,16 +11,21 @@ logger = get_logger("prices")
 REQUIRED_COLUMNS = ["open", "high", "low", "close", "volume"]
 
 
-def load_prices(
-    ticker: str,
-    timeframe: str,
-) -> pd.DataFrame:
+from src.data.providers.yahoo import YahooProvider
+
+
+def load_prices(ticker: str, timeframe: str):
     """
-    Load OHLCV prices using provider abstraction.
+    Load price data using Yahoo only (stable across local & cloud).
     """
 
-    nse = NSEProvider()
     yahoo = YahooProvider()
+    df = yahoo.fetch_daily_ohlcv(ticker)
+
+    if df.empty:
+        raise ValueError(f"No price data available for {ticker}")
+
+    return df
 
     # -----------------------------
     # Intraday → fallback only

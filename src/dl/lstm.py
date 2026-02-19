@@ -139,6 +139,9 @@ def load_model(
     device: str = "cpu",
 ) -> LSTMPricePredictor:
     model = LSTMPricePredictor(num_features=num_features)
+    import os
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+         raise ValueError(f"Invalid model file: {path}")
     model.load_state_dict(torch.load(path, map_location=device))
     model.eval()
     return model
