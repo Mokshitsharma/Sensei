@@ -1,207 +1,188 @@
-# 📊 Sensei — Indian Stock Intelligence Platform
-
-Sensei is an **Indian equity analysis and decision-support platform** focused on **NIFTY 50 stocks**.  
-It combines **price action, technical indicators, chart patterns, fundamentals, intraday scalping logic, and backtesting** to generate **explainable BUY / HOLD / SELL signals**.
-
-> ⚠️ **Disclaimer**  
-> This project is for **educational and analytical purposes only**.  
-> It is **not** a live trading system and does **not** provide financial advice.
+cat << 'EOF' > README.md
+# 📈 Sensei AI Trading System
+- 🚀 Multi-Model AI Trading Engine for NIFTY 50 Stocks  
+- ML + Deep Learning + Reinforcement Learning + Regime Detection + NLP  
 
 ---
 
-## ✨ Key Highlights
+## 🧠 Overview
 
-- 🇮🇳 Indian market focused (NIFTY 50 only)
-- 📈 TradingView-style interactive charts (Lightweight Charts)
-- ⚡ Intraday scalping (5m / 15m)
-- 🧠 Explainable swing trading signals with confidence
-- 🧪 Built-in historical backtesting
-- 🧩 Clean, modular, production-grade architecture
+Sensei AI is an end-to-end intelligent trading system integrating:
 
----
+- 📊 Machine Learning
+- 🧠 LSTM & Temporal CNN
+- 🔄 PPO Reinforcement Learning
+- 📈 Hidden Markov Model (Regime Detection)
+- 📰 News Sentiment Analysis
+- 📉 Strategy Backtesting
+- 💻 Professional Streamlit Dashboard
 
-## 🧠 What Does Sensei Do?
-
-Sensei answers one core question:
-
-> **“Based on price, indicators, patterns, and fundamentals — should I BUY, HOLD, or SELL this stock?”**
-
-The system is designed as a **decision-support tool**, not an automated trading bot.
+It generates explainable BUY / SELL / HOLD signals using ensemble intelligence.
 
 ---
 
-## 🏗 How the System Works
+## 🏗 Architecture
 
-### 1️⃣ Data Layer
-- Fetches **historical and intraday price data**
-- Fetches **fundamental metrics** (PE, EPS, ROE)
-- Normalizes NSE symbols automatically
-
-### 2️⃣ Analysis (Domain Layer)
-- Technical indicators: EMA, RSI, MACD
-- Pattern detection: Golden Cross, Death Cross, Breakouts
-- Intraday scalping logic (Entry, Stop Loss, Target)
-- Swing trading signal scoring with confidence
-- Historical backtesting with performance metrics
-
-### 3️⃣ Visualization Layer
-- Candlestick charts using **Lightweight Charts**
-- EMA overlays
-- Timeframe-aware rendering (daily vs intraday)
-- Streamlit-based UI
-
----
-
-## 🧱 Project Architecture
-
+```text
+Market Data
+    ↓
+Feature Engineering
+    ↓
+ML + LSTM + TCN
+    ↓
+Regime Detection (HMM)
+    ↓
+PPO Agent
+    ↓
+Decision Engine + NLP
+    ↓
+Final Signal
+    ↓
+Backtest Engine
 ```
 
+---
+
+## ✨ Features
+
+### 📊 Multi-Model Signal Engine
+- Logistic Regression
+- Random Forest
+- Gradient Boosting
+- LSTM (5-Day Forecast)
+- Temporal CNN
+- PPO (Stable Baselines3)
+
+### 📈 Regime Detection
+- Hidden Markov Model
+- Covariance Regularization for Stability
+
+### 📰 News NLP Layer
+- Sentiment Score Integration
+- Signal Bias Adjustment
+
+### 📉 Backtesting Engine
+- Equity Curve
+- Sharpe Ratio
+- Max Drawdown
+- Total Return
+
+### 💻 Professional Dashboard
+- Groww-style Light UI
+- Company Name + Live Price Above Chart
+- ₹ Crore Market Cap Formatting
+- AI Metrics Row
+- Strategy Performance Visualization
+
+---
+
+## 📁 Project Structure
+
+```
 Sensei/
-├── app.py                     # Streamlit entry point
+│
+├── app.py
+├── models/
 ├── src/
 │   ├── data/
-│   │   ├── prices.py           # Price data loader
-│   │   └── nifty50.py          # NIFTY 50 universe
-│   ├── domain/
-│   │   ├── indicators.py       # RSI, MACD, EMA
-│   │   ├── patterns.py         # Chart pattern detection
-│   │   ├── signals.py          # BUY / HOLD / SELL logic
-│   │   ├── intraday.py         # Intraday scalping logic
-│   │   ├── backtest.py         # Strategy backtesting
-│   │   └── fundamentals.py     # PE, EPS, ROE
-│   └── charts/
-│       └── lightweight.py      # Chart rendering
+│   ├── ml/
+│   ├── dl/
+│   ├── regimes/
+│   ├── rl/
+│   ├── pipeline/
+│   ├── backtest/
+│   ├── charts/
+│   └── utils/
+│
 └── README.md
-
 ```
 
-**Design principle:** clean separation of concerns  
-`data → domain → charts → UI`
-
 ---
 
-## 📈 Features
+## ⚙️ Installation
 
-### 📊 Price & Technical Analysis
-- Candlestick charts
-- EMA (20 / 50)
-- RSI
-- MACD
-- Golden Cross / Death Cross
-- Breakout detection
-
-### ⚡ Intraday Scalping (5m / 15m)
-- Real-time intraday candles
-- Entry price
-- Stop loss
-- Target price
-- No-trade filtering
-
-### 🧠 Swing Trading Signals
-- BUY / HOLD / SELL
-- Confidence score
-- Explainable reasoning behind signals
-
-### 🧪 Backtesting
-- Historical signal evaluation
-- Win rate, return %, max drawdown
-- Equity curve logic
-- CSV export for analysis
-
-### 📊 Fundamentals (Indian Stocks)
-- PE Ratio
-- EPS
-- ROE
-
----
-
-## 🛠 Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Language | Python |
-| UI | Streamlit |
-| Charts | Lightweight Charts |
-| Data | yfinance |
-| Analysis | Pandas, NumPy |
-| Architecture | Modular / Layered |
-
----
-
-## ▶️ How to Run Locally
-
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/your-username/sensei.git
-cd sensei
-````
-
-### 2️⃣ Install Dependencies
-
-```bash
+```
+git clone https://github.com/your-username/sensei-ai.git
+cd sensei-ai
+python -m venv venv
+source venv/bin/activate   # Mac/Linux
+venv\\Scripts\\activate    # Windows
 pip install -r requirements.txt
 ```
 
-### 3️⃣ Run the Application
+---
+
+## ▶️ Run Application
 
 ```bash
 streamlit run app.py
 ```
 
-The app will be available at:
+Open in browser:
 
-```
 http://localhost:8501
-```
 
 ---
 
-## 🧭 How to Use the App
+## 📊 Sample Output
 
-1. Select a **NIFTY 50 stock**
-2. Choose a **timeframe**
+Final Decision: BUY  
+Confidence: 72.5%
 
-   * Intraday: `5m`, `15m`
-   * Swing: `6mo`, `1y`, `2y`, `5y`
-3. Analyze:
-
-   * Price & EMA trends
-   * Intraday setups (if applicable)
-   * Swing signal, confidence & reasoning
-   * Backtest performance
-
----
-
-## 🎯 Use Cases
-
-* Learning technical analysis
-* Practicing quant & trading logic
-* Stock research & screening
-* Portfolio / interview project
-* Strategy experimentation (non-live)
+With:
+- ML Probability
+- LSTM Return Forecast
+- TCN Return Forecast
+- Market Regime
+- PPO Action
+- News Sentiment
+- Backtested Performance
 
 ---
 
-## 🔮 Future Improvements
+## 🛠 Tech Stack
 
-* Replace yfinance with broker-grade APIs (Zerodha Kite, TrueData)
-* Market-hours & holiday awareness
-* Slippage & brokerage modeling
-* Multi-timeframe confirmation
-* Portfolio-level position sizing
-* Trade logging & persistence
-* Alerts (Telegram / Email)
-* Authentication & SaaS deployment
+- Python 3.12+
+- Streamlit
+- Scikit-Learn
+- PyTorch
+- Stable-Baselines3
+- hmmlearn
+- Pandas / NumPy
+- yfinance
 
 ---
 
-## 📌 Final Notes
+## ⚠ Disclaimer
 
-Sensei is designed to demonstrate:
+This project is for educational and research purposes only.  
+It is NOT financial advice.
 
-* Strong Python engineering
-* Clean system design
-* Practical understanding of financial markets
-* Explainable analytics over black-box signals
+Trading involves market risk.
 
-If you find this project useful, consider ⭐ starring the repository."# Sensei1" 
+---
+
+## 🔮 Roadmap
+
+- 🔴 Live streaming prices  
+- 📌 Buy/Sell markers on chart  
+- 🌙 Dark mode toggle  
+- 📊 Portfolio tracking  
+- ☁️ Cloud deployment  
+- 🏦 Broker API integration  
+
+---
+
+## ⭐ Project Status
+
+✔ Stable  
+✔ Fully Functional  
+✔ Multi-Model AI Integrated  
+✔ Backtesting Engine Operational  
+✔ Clean Professional UI  
+
+---
+
+# 🧠 Built for Advanced AI Trading Research
+
+Sensei AI demonstrates how ML, DL, RL, and NLP can be unified into a production-style trading intelligence system.
