@@ -1,6 +1,6 @@
 # src/rl/env.py
 
-import gym
+import gymnasium as gym
 import numpy as np
 import pandas as pd
 from gym import spaces
