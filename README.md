@@ -1,4 +1,3 @@
-cat << 'EOF' > README.md
 # 📈 Sensei AI Trading System
 - 🚀 Multi-Model AI Trading Engine for NIFTY 50 Stocks  
 - ML + Deep Learning + Reinforcement Learning + Regime Detection + NLP  
