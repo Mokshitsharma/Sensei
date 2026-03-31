@@ -27,11 +27,25 @@ class YahooProvider(PriceProvider):
         df = df.reset_index()
         return sanitize_ohlcv(df)
 
-    def fetch_intraday_ohlcv(self, symbol: str, interval: str) -> pd.DataFrame:
+    def fetch_intraday_ohlcv(
+        self,
+        symbol: str,
+        interval: str = "15m",
+        lookback_days: int = 5,
+    ) -> pd.DataFrame:
+        if lookback_days <= 5:
+            period = "5d"
+        elif lookback_days <= 30:
+            period = "1mo"
+        elif lookback_days <= 60:
+            period = "2mo"
+        else:
+            period = "5d"
+
         df = yf.download(
             symbol,
             interval=interval,
-            period="5d",
+            period=period,
             progress=False,
         )
 

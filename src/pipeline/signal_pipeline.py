@@ -114,11 +114,53 @@ def run_signal_pipeline(
 
     ppo_action = agent.act(obs)
 
+    # ─────────────────────────────────────────────────────────────────────
+    # SHAP values for the ML model
+    # ─────────────────────────────────────────────────────────────────────
+    shap_values = None
+    feature_values = {}
+
+    try:
+        from src.ml.model import load_model as load_ml_model
+        from src.ml.shap_explain import compute_shap_values
+        from src.utils.config import FEATURE_COLUMNS
+
+        ml_model = load_ml_model("ml_return_model")
+
+        feat_cols = [c for c in FEATURE_COLUMNS if c in feature_df.columns]
+
+        # Background: last 100 rows (representative sample)
+        X_background = feature_df[feat_cols].dropna().tail(100).values
+
+        # Row to explain: very latest bar
+        X_explain = feature_df[feat_cols].iloc[-1:].fillna(0).values
+
+        shap_values = compute_shap_values(
+            model=ml_model,
+            X_background=X_background,
+            X_explain=X_explain,
+            feature_names=feat_cols,
+        )
+
+        # Raw feature values for the narrator
+        feature_values = {
+            col: float(feature_df[col].iloc[-1])
+            for col in feat_cols
+            if col in feature_df.columns
+        }
+
+    except Exception:
+        # SHAP is optional — never crash the pipeline
+        pass
+
     return {
-        "rule_signal": rule_signal,
-        "ml_prob_up": ml_prob_up,
-        "lstm_return": lstm_return,
-        "tcn_return": tcn_return,
-        "regime": regime,
-        "ppo_action": ppo_action,
+        "rule_signal":    rule_signal,
+        "ml_prob_up":     ml_prob_up,
+        "lstm_return":    lstm_return,
+        "tcn_return":     tcn_return,
+        "regime":         regime,
+        "ppo_action":     ppo_action,
+        # New fields for explainability
+        "shap_values":    shap_values,
+        "feature_values": feature_values,
     }
