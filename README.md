@@ -1,281 +1,147 @@
 # 🧠 Sensei AI — Intelligent Stock Analysis Platform
 
-> **Institutional-grade AI trading intelligence for Indian equity markets, built for retail investors.**
+> **Institutional-grade AI trading intelligence for all 50 Nifty stocks, built for retail investors.**
 
-[![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square&logo=python)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.32-red?style=flat-square&logo=streamlit)](https://streamlit.io)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.2-orange?style=flat-square&logo=pytorch)](https://pytorch.org)
-[![Stable-Baselines3](https://img.shields.io/badge/SB3-2.3-purple?style=flat-square)](https://stable-baselines3.readthedocs.io)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-
----
-
-## 🎯 What is Sensei?
-
-Sensei AI is a real-time stock analysis platform that unifies **five AI model families** — classical machine learning, LSTM, Temporal CNN, Proximal Policy Optimization (PPO), and Hidden Markov Models — with **FinBERT news NLP**, **multi-method Support & Resistance detection**, and a **plain-English Market Narrator** to deliver actionable, explainable trading decisions for all 50 Nifty stocks.
+![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.32-red?style=flat-square&logo=streamlit)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.2-orange?style=flat-square&logo=pytorch)
+![Stable-Baselines3](https://img.shields.io/badge/SB3-2.3-purple?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
 
-## ✨ Features
+## 📌 Problem Statement
 
-### 🤖 Multi-Model AI Decision Engine
+Retail investors in India have no access to the same level of AI-powered trading intelligence that institutional players use. They rely on tips, basic charts, and gut feeling — with no unified, explainable system that combines technical analysis, deep learning, reinforcement learning, and real-time news sentiment into a single decision. The result is uninformed trades, poor risk management, and missed opportunities across the Nifty 50.
 
-The heart of Sensei is a scored voting system across 6 signal layers:
+---
 
-| Signal | Model | Output |
+## 💡 My Solution
+
+Sensei AI is a real-time stock analysis platform that unifies **five AI model families** with **financial NLP**, **multi-method Support & Resistance detection**, and a **plain-English Market Narrator** to deliver actionable, explainable BUY / SELL / HOLD decisions for all 50 Nifty stocks.
+
+A **scored voting decision engine** (range: −5.0 to +5.0) aggregates signals from:
+- Classical ML (Random Forest + SHAP)
+- Deep Learning (LSTM + Temporal CNN via PyTorch)
+- Reinforcement Learning (PPO Agent via Stable-Baselines3)
+- Regime Detection (Hidden Markov Model)
+- Financial NLP (FinBERT sentiment on live Google News RSS)
+
+The output includes confidence score, SHAP-based feature attribution, intraday/swing trade setups, backtesting metrics, and a 6-tab AI Analyst Report — all in a Streamlit web app.
+
+---
+
+## 📊 Metrics
+
+| Model | Type | Output |
 |---|---|---|
-| Technical Analysis | RSI, MACD, EMA crossover | Rule-based signal |
-| Classical ML | Random Forest + SHAP | UP probability + feature attribution |
-| Deep Learning 1 | LSTM (2-layer, PyTorch) | 5-day return forecast |
-| Deep Learning 2 | Temporal CNN (causal, dilated) | 5-day return forecast |
-| Reinforcement Learning | PPO Agent (Stable-Baselines3) | BUY / SELL / HOLD action |
-| Regime Detection | Hidden Markov Model | BULL / BEAR market state |
+| Random Forest | Classical ML | UP probability (0–1) + SHAP attribution |
+| LSTM (2-layer, PyTorch) | Deep Learning | 5-day return forecast |
+| Temporal CNN (causal, dilated) | Deep Learning | 5-day return forecast |
+| PPO Agent (Stable-Baselines3) | Reinforcement Learning | BUY / SELL / HOLD action |
+| GaussianHMM (hmmlearn) | Regime Detection | BULL / BEAR market state |
+| FinBERT (HuggingFace) | Financial NLP | Weighted sentiment score (−1 to +1) |
 
-All signals are aggregated into a final **BUY / SELL / HOLD** decision with a confidence score.
+**Backtest Metrics:**
+- Total Return (%)
+- Sharpe Ratio
+- Maximum Drawdown (%)
 
-### 📰 News Intelligence Engine
+**Decision Engine:**
+- Score ≥ +2.0 → BUY
+- Score ≤ −2.0 → SELL
+- Otherwise → HOLD
+- Confidence = min(|score| / 5.0, 1.0)
 
-- Live headlines via **Google News RSS** (up to 10 per stock)
-- **FinBERT** (ProsusAI) financial sentiment with keyword-VADER fallback
-- Domain-weighted scoring:
-  - Earnings headlines: **1.5×**
-  - Regulatory news: **1.3×**
-  - Management changes: **1.2×**
-  - Macro news: **0.9×**
-  - General: **0.6×**
-- Automatic top bullish / top bearish headline identification
-- **News-driven price forecast**: direction, predicted price, ±range, confidence
+---
 
-### 📊 Support & Resistance Engine (5 Methods)
+## 🛠️ Skills & Tech Stack
 
-| Method | Description |
+| Category | Tools |
 |---|---|
-| Classic Pivot Points | Calculated from previous session H/L/C |
-| Fibonacci Retracements | Drawn from recent swing high → swing low |
-| Camarilla Pivots | Tighter intraday S/R levels |
-| Swing High/Low Detection | Rolling pivot algorithm on daily OHLCV |
-| Volume Profile Peaks | Price zones with above-average volume |
+| Language | Python 3.13 |
+| Web UI | Streamlit 1.32, streamlit-lightweight-charts |
+| Deep Learning | PyTorch 2.2 (LSTM, Temporal CNN) |
+| Reinforcement Learning | Stable-Baselines3 2.3, Gymnasium |
+| Classical ML | Scikit-learn 1.3 (Random Forest) |
+| Explainability | SHAP ≥ 0.44 (TreeExplainer) |
+| Financial NLP | HuggingFace Transformers (FinBERT by ProsusAI) |
+| Regime Detection | hmmlearn 0.3 (GaussianHMM) |
+| Market Data | yfinance 0.2, nsepython 0.0.972 |
+| News | feedparser 6.0 (Google News RSS) |
+| Data | Pandas 2.1, NumPy 1.26 |
+| Visualization | Matplotlib 3.8 |
+| Model Serialization | joblib 1.3 |
+| Dev Environment | VS Code Dev Containers |
 
-Returns **top-3 supports** and **top-3 resistances**, each with strength rating (`Strong / Moderate / Weak`) and historical touch count.
+---
 
-### 🧠 AI Analyst Report (6 Tabs)
+## 📂 Dataset Details
 
-The **Market Narrator** translates every model number into investor-readable language:
-
-- 📈 **Trend** — EMA crossover, regime, 5-day momentum, price range position
-- ⚡ **Momentum** — RSI (overbought/oversold), MACD divergence, 1-day return
-- 🌊 **Volatility** — ATR %, 10-day realized volatility assessment
-- 🤖 **AI Models** — LSTM/TCN/PPO/ML consensus narrative
-- 🔍 **SHAP Drivers** — horizontal bar chart + text explaining top prediction factors
-- 📰 **News** — sentiment direction, magnitude, and market impact explanation
-
-### 📐 Trade Setup Generator
-
-| Mode | Data | Output |
+| Source | Type | Coverage |
 |---|---|---|
-| ⚡ Intraday | 15-min OHLCV (5-day) | Entry zone, Stop Loss, T1, T2, R:R, candlestick bias |
-| 📅 Swing | Daily OHLCV | Multi-day setup with ATR-based levels and trade plan |
+| Yahoo Finance (yfinance) | OHLCV daily + 15-min intraday | All 50 Nifty stocks |
+| NSE Python (nsepython) | NSE live fundamentals (PE, ROE, 52W range, Market Cap) | All 50 Nifty stocks |
+| Google News RSS | Live financial headlines (up to 10 per stock) | Real-time |
 
-### 📈 Strategy Backtesting
+**Features engineered for ML models (9 features):**
+RSI (normalized), EMA spread, MACD divergence, ATR %, 10-day volatility, 1-day return, 5-day return, 10-day return, price range position.
 
-- Equity curve visualization
-- **Sharpe Ratio**, **Maximum Drawdown**, **Total Return**
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Technology | Version |
-|---|---|---|
-| Web UI | Streamlit | 1.32.2 |
-| Interactive Charts | streamlit-lightweight-charts | 0.7.20 |
-| Deep Learning | PyTorch | 2.2.2 |
-| Reinforcement Learning | Stable-Baselines3 | 2.3.2 |
-| RL Environment | Gymnasium | — |
-| Classical ML | Scikit-learn | 1.3.2 |
-| Explainability | SHAP | ≥0.44.0 |
-| Regime Detection | hmmlearn | 0.3.2 |
-| NLP (Financial) | HuggingFace Transformers (FinBERT) | — |
-| News Fetching | feedparser | 6.0.11 |
-| Market Data | yfinance | 0.2.37 |
-| NSE Data | nsepython | 0.0.972 |
-| Data Manipulation | pandas | 2.1.4 |
-| Numerical Computing | numpy | 1.26.4 |
-| Visualization | Matplotlib | 3.8.2 |
-| Model Serialization | joblib | 1.3.2 |
+**LSTM/TCN input:** (batch, 30 days, 4 features) — RSI_norm, EMA_spread, MACD_diff, ATR_%
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.13
-- pip
-- ~2GB disk space (for model weights and dependencies including PyTorch)
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/Mokshitsharma/Sensei.git
-cd Sensei
-
-# Install all dependencies
-pip install -r requirements.txt
-```
-
-> ⚠️ PyTorch 2.2 and Stable-Baselines3 are large dependencies. Installation may take a few minutes.
-
-### Run the App
-
-```bash
-streamlit run app.py
-```
-
-Open your browser at **http://localhost:8501**
-
-### Usage
-
-1. Select a stock from the **Nifty 50 dropdown** in the sidebar
-2. Choose a **timeframe** (1y, 2y, or 5y)
-3. Click **Run Analysis**
-4. Explore the AI decision, price chart, fundamentals, backtest, AI report, news, S/R levels, and trade setups
-
-### Dev Container (Optional)
-
-If you use VS Code with the Dev Containers extension:
-
-```bash
-code .
-# Ctrl+Shift+P → "Dev Containers: Reopen in Container"
-```
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        STREAMLIT UI                             │
-└──────────────────────┬──────────────────────────────────────────┘
-                       │
-          ┌────────────▼────────────┐
-          │      DATA LAYER         │
-          │  yfinance · nsepython   │
-          │  Google News RSS        │
-          └────────────┬────────────┘
-                       │
-          ┌────────────▼──────────────────────────────────┐
-          │              SIGNAL PIPELINE                   │
-          │                                                │
-          │  Rule-based TA   Random Forest + SHAP          │
-          │  LSTM (PyTorch)  Temporal CNN (PyTorch)        │
-          │  PPO Agent       HMM Regime Detection          │
-          └────────────┬───────────────────────────────────┘
-                       │
-          ┌────────────▼──────────────────┐
-          │       NEWS NLP LAYER           │
-          │  FinBERT sentiment scoring     │
-          │  Impact weighting              │
-          │  News-driven price forecast    │
-          └────────────┬──────────────────┘
-                       │
-          ┌────────────▼──────────────────┐
-          │       DECISION ENGINE          │
-          │  Scored voting (−5 to +5)      │
-          │  BUY ≥2 · SELL ≤−2 · HOLD    │
-          └────────────┬──────────────────┘
-                       │
-          ┌────────────▼──────────────────┐
-          │       MARKET NARRATOR          │
-          │  SHAP attribution → text       │
-          │  6-tab plain-English report    │
-          └────────────┬──────────────────┘
-                       │
-          ┌────────────▼──────────────────────────────────┐
-          │              UI RENDER                         │
-          │  Decision · Chart · Fundamentals · Backtest    │
-          │  AI Report · News · S&R · Trade Setup          │
-          └────────────────────────────────────────────────┘
-```
-
----
-
-## 🧮 Decision Engine Logic
-
-```python
-Score range: -5.0 to +5.0
-
-Signal             Condition      Score
-─────────────────────────────────────────
-ML Prob UP         > 60%          +1.0
-ML Prob UP         < 40%          -1.0
-LSTM Forecast      > 0            +1.0
-LSTM Forecast      < 0            -1.0
-TCN Forecast       > 0            +0.5
-HMM Regime         BULL           +1.0
-HMM Regime         BEAR           -1.0
-PPO Action         BUY            +1.0
-PPO Action         SELL           -1.0
-News Sentiment     > 0.20         +1.0
-News Sentiment     < -0.20        -1.0
-
-Final: BUY if score ≥ 2  |  SELL if score ≤ -2  |  HOLD otherwise
-Confidence = min(|score| / 5.0, 1.0)
-```
-
----
-
-## 📁 Project Structure
+## 🗂️ Folder Structure
 
 ```
 Sensei/
-├── app.py                          # Streamlit UI + orchestration
-├── requirements.txt
+├── app.py                          # Streamlit UI + orchestration (585 lines)
+├── requirements.txt                # All dependencies
 ├── runtime.txt                     # Python 3.13
 ├── config/
 │   ├── settings.yaml               # Feature columns, model config
 │   └── logging.yaml
-├── models/                         # Pre-trained weights
-│   ├── lstm_HDFCBANK_NS.pt         # LSTM weights
-│   ├── tcn_HDFCBANK_NS.pt          # TCN weights
-│   ├── ppo_hdfc.zip                # PPO agent
+├── models/                         # Pre-trained model weights
+│   ├── lstm_HDFCBANK_NS.pt         # LSTM weights (PyTorch)
+│   ├── tcn_HDFCBANK_NS.pt          # Temporal CNN weights
+│   ├── ppo_hdfc.zip                # PPO agent (SB3)
 │   └── ml_return_model.joblib      # Random Forest
 └── src/
     ├── data/                       # Data ingestion
     │   ├── nifty50.py              # Ticker dictionary (50 stocks)
     │   ├── prices.py               # OHLCV loader
     │   ├── news.py                 # News NLP pipeline
-    │   └── providers/              # Yahoo + NSE provider abstraction
+    │   └── providers/              # Yahoo + NSE abstraction
     ├── domain/                     # Business logic
     │   ├── indicators.py           # RSI, MACD, EMA, ATR
-    │   ├── signals.py              # Rule-based signal
+    │   ├── signals.py              # Rule-based signals
     │   ├── support_resistance.py   # 5-method S/R engine
-    │   ├── setup_engine.py         # Trade setup builder
-    │   └── news_price_model.py     # News → price forecast
+    │   ├── setup_engine.py         # Intraday + Swing trade setup
+    │   └── news_price_model.py     # News → price impact forecast
     ├── ml/                         # Classical ML
-    │   ├── features.py             # 9-feature engineering
+    │   ├── features.py             # Feature engineering (9 features)
     │   ├── model.py                # Random Forest loader
     │   └── shap_explain.py         # SHAP TreeExplainer
     ├── dl/                         # Deep Learning
-    │   ├── lstm.py                 # LSTMPricePredictor
-    │   ├── temporal_cnn.py         # TemporalCNN (TCN)
+    │   ├── lstm.py                 # LSTMPricePredictor (2-layer)
+    │   ├── temporal_cnn.py         # TemporalCNN (causal, dilated)
     │   └── train.py                # Training script
     ├── rl/                         # Reinforcement Learning
     │   ├── env.py                  # Gymnasium TradingEnv
     │   ├── agent.py                # PPOTradingAgent
     │   └── train.py                # PPO training
-    ├── regimes/                    # Regime detection
-    │   └── hmm.py                  # GaussianHMM (2-state)
-    ├── pipeline/                   # Orchestration
-    │   ├── signal_pipeline.py      # All model inference
-    │   └── decision_engine.py      # Scoring + BUY/SELL/HOLD
+    ├── regimes/
+    │   └── hmm.py                  # GaussianHMM (2-state: BULL/BEAR)
+    ├── pipeline/
+    │   ├── signal_pipeline.py      # All model inference orchestration
+    │   └── decision_engine.py      # Scoring + BUY/SELL/HOLD logic
     ├── explainability/
-    │   └── narrator.py             # Signals → plain English
+    │   └── narrator.py             # Signals → plain-English 6-tab report
     ├── backtest/
-    │   ├── engine.py
-    │   └── metrics.py
+    │   ├── engine.py               # Backtest runner
+    │   └── metrics.py              # Sharpe, Drawdown, Return
+    ├── charts/
+    │   └── lightweight.py          # Price chart renderer
     └── utils/
         ├── config.py
         ├── logger.py
@@ -284,91 +150,97 @@ Sensei/
 
 ---
 
-## 📊 Model Details
+## ⚙️ System Architecture
 
-### LSTM Price Predictor
 ```
-Architecture: 2-layer LSTM → Linear(64→32) → ReLU → Linear(32→1)
-Input: (batch, 30 days, 4 features)
-Output: Predicted 5-day return (regression)
-Features: RSI_norm, EMA_spread, MACD_diff, ATR_%
-Loss: MSE | Optimizer: Adam
-```
-
-### Temporal CNN (TCN)
-```
-Architecture: 3 TemporalBlocks with dilated causal convolutions
-Dilations: [1, 2, 4] | Channels: [32, 32, 64] | Kernel: 3
-Each block: Conv1d → Chomp1d → ReLU → Dropout → Residual connection
-Output: Linear(64→32) → ReLU → Linear(32→1)
-```
-
-### PPO Reinforcement Learning
-```
-Environment: Gymnasium TradingEnv
-Actions: {0=HOLD, 1=BUY, 2=SELL}
-Observation: 4 technical features at time t
-Reward: ΔNAV − drawdown_penalty (×0.1)
-Initial portfolio: ₹1,00,000 | Transaction cost: 0.1%
-```
-
-### Hidden Markov Model
-```
-Library: hmmlearn GaussianHMM
-States: 2 (BULL / BEAR) | Covariance: diagonal
-Features: daily percentage returns (stationary)
-Outlier filter: |returns| < 50% | Iterations: 200
+Step 1 → User selects Nifty 50 stock + timeframe via Streamlit sidebar
+Step 2 → Data Layer fetches OHLCV (yfinance), fundamentals (nsepython), live news (Google RSS)
+Step 3 → Feature Engineering computes 9 ML features (RSI, EMA, MACD, ATR, returns, volatility)
+Step 4 → Signal Pipeline runs all 5 AI models in parallel:
+          → Random Forest → UP probability + SHAP attribution
+          → LSTM (PyTorch) → 5-day return forecast
+          → Temporal CNN (PyTorch) → 5-day return forecast
+          → PPO Agent (SB3) → BUY/SELL/HOLD action
+          → GaussianHMM → BULL/BEAR regime
+Step 5 → News NLP Pipeline: FinBERT scores each headline → domain-weighted sentiment score
+Step 6 → Decision Engine aggregates all signals into score (−5 to +5) → final BUY/SELL/HOLD + confidence
+Step 7 → Market Narrator generates 6-tab plain-English AI Analyst Report
+Step 8 → Support & Resistance Engine runs 5 methods → top 3 supports + top 3 resistances
+Step 9 → Trade Setup Generator builds intraday (15-min) + swing (daily) setups with Entry/SL/Target/R:R
+Step 10 → Backtest Engine runs strategy → Sharpe Ratio, Max Drawdown, Total Return
+Step 11 → Streamlit UI renders all outputs: Decision Card, Price Chart, Metrics, News, S/R, Trade Setups
 ```
 
 ---
 
-## ⚠️ Limitations & Known Issues
+## 🔍 Why This Tech Stack?
 
-- Pre-trained LSTM, TCN, and PPO models are trained on **HDFCBANK.NS only**. The system loads these same weights for all other Nifty 50 stocks — predictions will be less accurate for other tickers until per-stock training is done.
-- The backtest uses a simplified signal series (positive/negative returns) rather than the actual ML-generated signals. Use backtesting results directionally only.
-- FinBERT requires a HuggingFace model download on first run (~500MB). Ensure internet connectivity.
-- Intraday trade setups require the Yahoo intraday data endpoint to be accessible; this may fail intermittently.
+| Choice | Reason |
+|---|---|
+| **Streamlit** | Fastest way to build interactive data apps in Python — no frontend dev needed |
+| **PyTorch** | Flexible deep learning framework for custom LSTM + Temporal CNN architectures |
+| **Stable-Baselines3** | Best production-ready RL library for Gymnasium environments |
+| **FinBERT** | Domain-specific BERT model pre-trained on financial text — far superior to generic sentiment models |
+| **SHAP** | Industry-standard explainability; TreeExplainer is optimized for Random Forest |
+| **hmmlearn** | Lightweight, reliable HMM library; GaussianHMM is ideal for continuous return sequences |
+| **yfinance + nsepython** | Free, reliable Indian stock market data sources for NSE/BSE |
+| **feedparser** | Lightweight RSS parser for real-time Google News integration |
 
 ---
 
-## 🗺️ Roadmap
+## 🚀 Getting Started
 
-- [ ] **Per-stock model training** — automated training pipeline for all 50 Nifty stocks
-- [ ] **Real-time streaming** — WebSocket-based live price updates
-- [ ] **Portfolio optimizer** — Markowitz / Kelly criterion multi-stock view
-- [ ] **Realistic backtest** — slippage, partial fills, position sizing
-- [ ] **Alert system** — Telegram / email notifications on signal changes
-- [ ] **Transformer model** — Temporal Fusion Transformer for longer-horizon forecasting
-- [ ] **Options intelligence** — OI, PCR, IV skew integration
-- [ ] **Model drift monitoring** — rolling accuracy tracking + retraining triggers
+### Prerequisites
+- Python 3.13
+- pip
+- ~2GB disk space (PyTorch + model weights)
+
+### Installation
+```bash
+git clone https://github.com/Mokshitsharma/Sensei.git
+cd Sensei
+pip install -r requirements.txt
+```
+
+### Run
+```bash
+streamlit run app.py
+```
+Open browser at **http://localhost:8501**
+
+### Usage
+1. Select a stock from the Nifty 50 dropdown
+2. Choose a timeframe (1y / 2y / 5y)
+3. Click **Run Analysis**
+4. Explore: AI Decision → Chart → Fundamentals → Backtest → AI Report → News → S&R → Trade Setups
+
+---
+
+## 🔮 Future Improvements
+
+1. **Per-stock model training** — automated training pipeline for all 50 Nifty stocks (current models trained on HDFCBANK only)
+2. **Real-time WebSocket streaming** — live price tick updates instead of on-demand fetch
+3. **Portfolio optimizer** — Markowitz / Kelly Criterion multi-stock allocation view
+4. **Transformer model** — Temporal Fusion Transformer for longer-horizon (10–30 day) forecasting
+5. **Alert system** — Telegram / email push notifications on signal changes
+6. **Realistic backtest** — slippage, partial fills, position sizing, and commission modelling
+7. **Options intelligence** — OI data, PCR, IV skew integration for derivatives traders
 
 ---
 
 ## ⚠️ Disclaimer
 
-Sensei AI is built for **educational and research purposes only**. It is **not** financial advice. Do not make real investment decisions based solely on this tool's output. Always consult a SEBI-registered financial advisor.
+Sensei AI is built for **educational and research purposes only**. It is **not financial advice**. Do not make real investment decisions based solely on this tool. Always consult a SEBI-registered financial advisor.
 
 ---
 
-## 🤝 Contributing
+## 👤 Author
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add your feature'`
-4. Push: `git push origin feature/your-feature`
-5. Open a Pull Request
-
-For large changes, please open an issue first to discuss the direction.
+**Mokshit Sharma**
+B.Tech + M.Tech | AI & Data Science | DAVV, Indore
+📧 sharman48520@gmail.com | 🌐 [mokshitsharma27.vercel.app](https://mokshitsharma27.vercel.app)
+🔗 [LinkedIn](https://linkedin.com/in/mokshit-sharma-75b5ab305) | 💻 [GitHub](https://github.com/Mokshitsharma)
 
 ---
 
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-  <p>Built with ❤️ for Indian retail investors</p>
-  <p>⭐ Star this repo if you find it useful</p>
-</div>
+⭐ Star this repo if you find it useful!
