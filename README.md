@@ -239,7 +239,8 @@ Sensei AI is built for **educational and research purposes only**. It is **not f
 **Mokshit Sharma**
 B.Tech + M.Tech | AI & Data Science | DAVV, Indore
 📧 sharman48520@gmail.com | 🌐 [mokshitsharma27.vercel.app](https://mokshitsharma27.vercel.app)
-🔗 [LinkedIn](https://linkedin.com/in/mokshit-sharma-75b5ab305) | 💻 [GitHub](https://github.com/Mokshitsharma)
+🔗 [LinkedIn](https://linkedin.com/in/mokshit-sharma-75b5ab305) | 
+💻 [GitHub](https://github.com/Mokshitsharma)
 
 ---
 
