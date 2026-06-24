@@ -1942,45 +1942,9 @@ NIFTY_500: Dict[str, StockInfo] = {
         "tier": "small",
     },
 
-    # --- More Large Cap additions ---
-    "Tata Elxsi": {
-        "symbol": "TATAELXSI.NS",
-        "sector": "IT & Technology",
-        "tier": "large",
-    },
-
-    # Additional mid caps
-    "Balkrishna Industries": {
-        "symbol": "BALKRISIND.NS",
-        "sector": "Automobiles",
-        "tier": "mid",
-    },
-    "Orient Electric": {
-        "symbol": "ORIENTELEC.NS",
-        "sector": "Electricals & Electronics",
-        "tier": "mid",
-    },
-
-    # Additional small caps
-    "Syngene International": {
-        "symbol": "SYNGENE.NS",
-        "sector": "Pharma & Healthcare",
-        "tier": "mid",
-    },
-
     # -------------------------------------------------------------------------
-    # Additional large cap stocks to fill ~500 target
+    # Additional stocks to fill ~500 target
     # -------------------------------------------------------------------------
-    "Hindustan Aeronautics": {
-        "symbol": "HAL.NS",
-        "sector": "Defence & Aerospace",
-        "tier": "large",
-    },
-    "Tata Power": {
-        "symbol": "TATAPOWER.NS",
-        "sector": "Energy & Oil",
-        "tier": "large",
-    },
     "Vodafone Idea": {
         "symbol": "IDEA.NS",
         "sector": "Telecom",
@@ -2030,11 +1994,6 @@ NIFTY_500: Dict[str, StockInfo] = {
         "symbol": "JSWINFRA.NS",
         "sector": "Conglomerates & Industrials",
         "tier": "mid",
-    },
-    "Mankind Pharma": {
-        "symbol": "MANKIND.NS",
-        "sector": "Pharma & Healthcare",
-        "tier": "large",
     },
     "Ixigo": {
         "symbol": "IXIGO.NS",
@@ -2090,11 +2049,6 @@ NIFTY_500: Dict[str, StockInfo] = {
         "symbol": "EMSLTD.NS",
         "sector": "Industrials & Capital Goods",
         "tier": "small",
-    },
-    "Macrotech Developers": {
-        "symbol": "LODHA.NS",
-        "sector": "Real Estate",
-        "tier": "large",
     },
     "Akums Drugs": {
         "symbol": "AKUMS.NS",
@@ -2220,11 +2174,6 @@ NIFTY_500: Dict[str, StockInfo] = {
         "symbol": "WONDERLA.NS",
         "sector": "Hospitality & Tourism",
         "tier": "small",
-    },
-    "NYKAA Fashion": {
-        "symbol": "NYKAA.NS",
-        "sector": "Retail & E-Commerce",
-        "tier": "large",
     },
     "Bikaji Foods": {
         "symbol": "BIKAJI.NS",
@@ -2411,11 +2360,6 @@ NIFTY_500: Dict[str, StockInfo] = {
         "sector": "IT & Technology",
         "tier": "small",
     },
-    "Tata Consultancy Services": {
-        "symbol": "TCS.NS",
-        "sector": "IT & Technology",
-        "tier": "large",
-    },
     "Mastek": {
         "symbol": "MASTEK.NS",
         "sector": "IT & Technology",
@@ -2430,11 +2374,6 @@ NIFTY_500: Dict[str, StockInfo] = {
         "symbol": "KPITTECH.NS",
         "sector": "IT & Technology",
         "tier": "mid",
-    },
-    "Tata Elxsi (dup)": {
-        "symbol": "TATAELXSI.NS",
-        "sector": "IT & Technology",
-        "tier": "large",
     },
     "Hexaware Technologies": {
         "symbol": "HEXAWARE.NS",
