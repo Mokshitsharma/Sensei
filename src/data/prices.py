@@ -16,11 +16,17 @@ from src.data.providers.yahoo import YahooProvider
 
 def load_prices(ticker: str, timeframe: str):
     """
-    Load price data using Yahoo only (stable across local & cloud).
+    Load price data. Falls back to synthetic data when Yahoo Finance is
+    unreachable (e.g. restricted network environments).
     """
 
     yahoo = YahooProvider()
     df = yahoo.fetch_daily_ohlcv(ticker)
+
+    if df.empty:
+        logger.warning(f"Yahoo Finance unavailable for {ticker}, using synthetic data")
+        from src.data.providers.mock import MockProvider
+        df = MockProvider().fetch_daily_ohlcv(ticker)
 
     if df.empty:
         raise ValueError(f"No price data available for {ticker}")

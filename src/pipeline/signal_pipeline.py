@@ -112,7 +112,8 @@ def run_signal_pipeline(
     # Replace NaN / inf
     obs = np.nan_to_num(obs, nan=0.0, posinf=0.0, neginf=0.0)
 
-    ppo_action = agent.act(obs)
+    _ppo_raw = agent.act(obs)
+    ppo_action = {0: "HOLD", 1: "BUY", 2: "SELL"}.get(int(_ppo_raw), "HOLD")
 
     # ─────────────────────────────────────────────────────────────────────
     # SHAP values for the ML model
