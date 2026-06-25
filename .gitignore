@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Model training artifacts
+training/training_report.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
