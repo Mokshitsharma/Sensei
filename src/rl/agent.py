@@ -1,5 +1,6 @@
 # src/rl/agent.py
 
+from src.utils import numpy_compat
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from typing import Optional
@@ -28,6 +29,7 @@ class PPOTradingAgent:
         self.env = DummyVecEnv([lambda: env])
 
         if model_path:
+            numpy_compat.patch()
             self.model = PPO.load(model_path, env=self.env)
         else:
             self.model = PPO(
@@ -56,6 +58,7 @@ class PPOTradingAgent:
         """
         Load trained agent.
         """
+        numpy_compat.patch()
         self.model = PPO.load(path, env=self.env)
 
     def act(self, observation):

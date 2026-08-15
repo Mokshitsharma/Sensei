@@ -1,0 +1,8 @@
+.venv/
+frontend/
+__pycache__/
+*.pyc
+.git/
+*.log
+app.py
+.streamlit/

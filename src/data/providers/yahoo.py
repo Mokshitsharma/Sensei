@@ -53,4 +53,5 @@ class YahooProvider(PriceProvider):
             return pd.DataFrame()
 
         df = df.reset_index()
-        return sanitize_ohlcv(df)
+        df = sanitize_ohlcv(df)
+        return df.rename(columns={"datetime": "date"})
