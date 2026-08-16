@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,17 +31,6 @@ export const metadata: Metadata = {
   },
 };
 
-const THEME_INIT_SCRIPT = `
-(function () {
-  try {
-    var theme = localStorage.getItem("sensei-theme");
-    if (theme === "light" || theme === "dark") {
-      document.documentElement.dataset.theme = theme;
-    }
-  } catch (e) {}
-})();
-`;
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <ClerkProvider
@@ -59,11 +47,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col bg-background text-foreground">
-          <Script
-            id="theme-init"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-          />
           {children}
         </body>
       </html>

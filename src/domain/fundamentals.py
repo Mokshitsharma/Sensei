@@ -11,7 +11,10 @@ def _fetch_info(ticker: str, attempts: int = 3) -> dict:
     with a fresh Ticker object before giving up."""
     last_info: dict = {}
     for attempt in range(attempts):
-        info = yf.Ticker(ticker).info
+        try:
+            info = yf.Ticker(ticker).info
+        except Exception:
+            info = {}
         if info.get("currentPrice") or info.get("regularMarketPrice"):
             return info
         last_info = info
