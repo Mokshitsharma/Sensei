@@ -10,7 +10,7 @@ export default function NotFound() {
         the intelligence engine yet.
       </p>
       <Link
-        href="/"
+        href="/explore"
         className="mt-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black hover:bg-accent-hover"
       >
         Back to Explore

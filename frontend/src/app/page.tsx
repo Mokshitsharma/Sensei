@@ -1,50 +1,96 @@
+import Link from "next/link";
+import { SignInButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { api } from "@/lib/api";
-import { AppShell } from "@/components/AppShell";
-import { StockCard } from "@/components/StockCard";
+import { TickerStrip } from "@/components/TickerStrip";
 
-export default async function HomePage() {
-  const start = performance.now();
-  const [indices, stocks, popular] = await Promise.all([
-    api.indices(),
-    api.stocks(),
-    api.popularStocks(),
+export default async function LandingPage() {
+  const [indices, { userId }] = await Promise.all([
+    api.indices().catch(() => ({})),
+    auth(),
   ]);
-  const latencyMs = Math.round(performance.now() - start);
+  const isSignedIn = Boolean(userId);
 
   return (
-    <AppShell indices={indices} stocks={stocks}>
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="mb-6 flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-green/30 bg-green/10 px-3 py-1 text-xs font-mono text-green">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green" />
-            </span>
-            System Operational &middot; {latencyMs}ms latency
-          </span>
-        </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <TickerStrip indices={indices} />
 
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-lg font-semibold">Algorithmic Radar</h1>
-          <span className="rounded-md border border-border bg-surface-2 px-2 py-1 text-xs text-muted">
-            Large-cap focus
-          </span>
+      <header className="flex items-center justify-between px-6 sm:px-10 py-4">
+        <span className="text-xl font-bold text-accent">Sensei AI</span>
+        <div className="flex items-center gap-3">
+          {isSignedIn ? (
+            <Link
+              href="/explore"
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black hover:bg-accent-hover"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <SignInButton mode="modal" forceRedirectUrl="/explore">
+                <button className="text-sm font-medium text-muted hover:text-foreground px-3 py-2">
+                  Login
+                </button>
+              </SignInButton>
+              <SignInButton mode="modal" forceRedirectUrl="/explore">
+                <button className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black hover:bg-accent-hover">
+                  Join Pro
+                </button>
+              </SignInButton>
+            </>
+          )}
         </div>
-        <p className="text-sm text-muted mb-6">
-          AI-scored signals across India&apos;s most-traded large-cap stocks.
+      </header>
+
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-mono text-muted mb-8">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green" />
+          </span>
+          System Operational
+        </span>
+
+        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-tight">
+          <span className="text-foreground">AI Intelligence for the</span>
+          <br />
+          <span className="text-accent">Modern Trader.</span>
+        </h1>
+
+        <p className="mt-6 max-w-xl text-muted text-base sm:text-lg leading-relaxed">
+          Precision forecasting and algorithmic clarity across India&apos;s
+          most-traded large-cap stocks. Stop guessing. Start executing.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {popular.map((stock, i) => (
-            <StockCard key={stock.ticker} stock={stock} index={i} />
-          ))}
+        <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
+          {isSignedIn ? (
+            <Link
+              href="/explore"
+              className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-black hover:bg-accent-hover"
+            >
+              Open Dashboard
+            </Link>
+          ) : (
+            <>
+              <SignInButton mode="modal" forceRedirectUrl="/explore">
+                <button className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-black hover:bg-accent-hover">
+                  Start Free Trial
+                </button>
+              </SignInButton>
+              <SignInButton mode="modal" forceRedirectUrl="/explore">
+                <button className="flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-surface-2">
+                  <span>▷</span> View Live Demo
+                </button>
+              </SignInButton>
+            </>
+          )}
         </div>
 
-        <p className="mt-8 text-center text-xs text-muted">
-          More stocks, IPOs, and mutual funds are coming soon to the
-          intelligence engine.
+        <p className="mt-16 text-xs text-muted max-w-md">
+          Informational only — Sensei AI does not place trades or connect to
+          a broker. Nothing here is investment advice.
         </p>
-      </div>
-    </AppShell>
+      </main>
+    </div>
   );
 }

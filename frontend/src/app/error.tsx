@@ -30,7 +30,7 @@ export default function Error({
           Try again
         </button>
         <Link
-          href="/"
+          href="/explore"
           className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-2"
         >
           Back to Explore

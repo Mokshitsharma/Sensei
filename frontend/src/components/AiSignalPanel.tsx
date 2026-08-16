@@ -1,5 +1,6 @@
 import type { Decision, TradeSetup } from "@/lib/types";
 import { Badge } from "./ui/Badge";
+import { LockedSection } from "./ui/LockedOverlay";
 
 const TONE = {
   BUY: "green",
@@ -16,9 +17,11 @@ const GLOW_VAR = {
 export function AiSignalPanel({
   decision,
   swingSetup,
+  isSignedIn,
 }: {
   decision: Decision;
   swingSetup: TradeSetup;
+  isSignedIn: boolean;
 }) {
   const hasLevels = !(
     swingSetup.error &&
@@ -31,38 +34,46 @@ export function AiSignalPanel({
       <p className="text-xs uppercase tracking-wide text-muted font-semibold">
         AI Recommendation
       </p>
-      <div className="mt-3">
-        <span
-          className="animate-glow-pulse inline-block rounded-md"
-          style={{ "--tone": GLOW_VAR[decision.action] } as React.CSSProperties}
-        >
-          <Badge tone={TONE[decision.action]}>
-            <span className="text-base">{decision.action}</span>
-          </Badge>
-        </span>
-      </div>
       <p className="text-sm text-muted mt-2">
         {(decision.confidence * 100).toFixed(1)}% confidence
       </p>
 
-      {decision.narrative?.headline && (
-        <p className="mt-4 text-sm text-foreground/90 leading-relaxed border-t border-border pt-4">
-          {decision.narrative.headline}
-        </p>
-      )}
-
-      {hasLevels && (
-        <div className="mt-4 border-t border-border pt-4 space-y-2.5">
-          <p className="text-xs uppercase tracking-wide text-muted font-semibold mb-1">
-            Swing Trade Levels
-          </p>
-          <LevelRow label="Entry Zone" value={`₹${swingSetup.entry_zone[0].toFixed(2)}–${swingSetup.entry_zone[1].toFixed(2)}`} />
-          <LevelRow label="Stop Loss" value={`₹${swingSetup.stop_loss.toFixed(2)}`} tone="red" />
-          <LevelRow label="Target 1" value={`₹${swingSetup.target_1.toFixed(2)}`} tone="green" />
-          <LevelRow label="Risk / Reward" value={`${swingSetup.risk_reward.toFixed(1)}x`} />
-          <LevelRow label="Validity" value={swingSetup.validity} />
+      <LockedSection
+        locked={!isSignedIn}
+        title="Sign in to see the call"
+        description="BUY, SELL, or HOLD — plus entry, stop-loss, and targets. Free with Google."
+        minHeight={hasLevels ? 320 : 140}
+      >
+        <div className="mt-3">
+          <span
+            className="animate-glow-pulse inline-block rounded-md"
+            style={{ "--tone": GLOW_VAR[decision.action] } as React.CSSProperties}
+          >
+            <Badge tone={TONE[decision.action]}>
+              <span className="text-base">{decision.action}</span>
+            </Badge>
+          </span>
         </div>
-      )}
+
+        {decision.narrative?.headline && (
+          <p className="mt-4 text-sm text-foreground/90 leading-relaxed border-t border-border pt-4">
+            {decision.narrative.headline}
+          </p>
+        )}
+
+        {hasLevels && (
+          <div className="mt-4 border-t border-border pt-4 space-y-2.5">
+            <p className="text-xs uppercase tracking-wide text-muted font-semibold mb-1">
+              Swing Trade Levels
+            </p>
+            <LevelRow label="Entry Zone" value={`₹${swingSetup.entry_zone[0].toFixed(2)}–${swingSetup.entry_zone[1].toFixed(2)}`} />
+            <LevelRow label="Stop Loss" value={`₹${swingSetup.stop_loss.toFixed(2)}`} tone="red" />
+            <LevelRow label="Target 1" value={`₹${swingSetup.target_1.toFixed(2)}`} tone="green" />
+            <LevelRow label="Risk / Reward" value={`${swingSetup.risk_reward.toFixed(1)}x`} />
+            <LevelRow label="Validity" value={swingSetup.validity} />
+          </div>
+        )}
+      </LockedSection>
 
       <p className="mt-5 text-[11px] text-muted leading-relaxed border-t border-border pt-3">
         Informational only — Sensei AI does not place trades or connect to a

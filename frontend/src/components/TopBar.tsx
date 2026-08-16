@@ -1,11 +1,15 @@
 import Link from "next/link";
+import { SignInButton, UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import type { StockListItem } from "@/lib/types";
 import { SearchBar } from "./SearchBar";
 
-export function TopBar({ stocks }: { stocks: StockListItem[] }) {
+export async function TopBar({ stocks }: { stocks: StockListItem[] }) {
+  const { userId } = await auth();
+
   return (
     <header className="flex items-center gap-3 border-b border-border bg-surface px-3 sm:px-4 py-3">
-      <Link href="/" className="text-lg sm:text-xl font-bold text-accent shrink-0">
+      <Link href="/explore" className="text-lg sm:text-xl font-bold text-accent shrink-0">
         Sensei AI
       </Link>
       <div className="flex-1 min-w-0">
@@ -18,9 +22,19 @@ export function TopBar({ stocks }: { stocks: StockListItem[] }) {
         <button aria-label="Settings" className="hover:text-foreground">
           ⚙
         </button>
-        <div className="h-8 w-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-xs text-accent font-semibold">
-          U
-        </div>
+        {userId ? (
+          <UserButton
+            appearance={{
+              elements: { avatarBox: "h-8 w-8" },
+            }}
+          />
+        ) : (
+          <SignInButton mode="modal">
+            <button className="rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-black hover:bg-accent-hover">
+              Sign in
+            </button>
+          </SignInButton>
+        )}
       </div>
     </header>
   );

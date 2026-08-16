@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/", icon: "⌂", active: true, enabled: true },
+  { label: "Home", href: "/explore", icon: "⌂", active: true, enabled: true },
   { label: "Portfolio", href: "/portfolio", icon: "▤", enabled: false },
   { label: "Screener", href: "/screener", icon: "≡", enabled: false },
   { label: "Settings", href: "/settings", icon: "⚙", enabled: false },
