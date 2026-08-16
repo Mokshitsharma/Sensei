@@ -6,6 +6,7 @@ import type {
   NewsResponse,
   PopularStock,
   PriceResponse,
+  Quote,
   StockListItem,
   TradeSetup,
 } from "./types";
@@ -24,6 +25,7 @@ export const api = {
   indices: () => get<Indices>("/api/indices"),
   stocks: () => get<StockListItem[]>("/api/stocks"),
   popularStocks: () => get<PopularStock[]>("/api/stocks/popular"),
+  quote: (ticker: string) => get<Quote>(`/api/stocks/${encodeURIComponent(ticker)}/quote`),
   price: (ticker: string, timeframe = "1y") =>
     get<PriceResponse>(
       `/api/stocks/${encodeURIComponent(ticker)}/price?timeframe=${timeframe}`

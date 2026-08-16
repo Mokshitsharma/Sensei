@@ -89,7 +89,7 @@ function EquitySparkline({ data }: { data: number[] }) {
         <polyline
           points={points}
           fill="none"
-          stroke={up ? "#4ade80" : "#f87171"}
+          stroke={up ? "var(--green)" : "var(--red)"}
           strokeWidth="1.5"
           vectorEffect="non-scaling-stroke"
         />

@@ -5,6 +5,7 @@ os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 import logging
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -21,6 +22,11 @@ logger = logging.getLogger("sensei.prewarm")
 # the 300s cache TTL so they stay warm indefinitely while the server runs.
 _PREWARM_INTERVAL_S = 240
 
+# The gainers/losers + market-cap sections use a 30-min-cached heuristic
+# forecast (compute.prediction_7d) across ~45 curated tickers — re-warm
+# just under that TTL, in parallel, so /movers and /by-cap rarely hit cold.
+_PREDICTION_PREWARM_INTERVAL_S = 1500
+
 
 def _prewarm_loop():
     while True:
@@ -34,9 +40,18 @@ def _prewarm_loop():
         time.sleep(_PREWARM_INTERVAL_S)
 
 
+def _prediction_prewarm_loop():
+    while True:
+        tickers = list(meta._MOVERS_UNIVERSE.values())
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            list(pool.map(compute.prediction_7d, tickers))
+        time.sleep(_PREDICTION_PREWARM_INTERVAL_S)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     threading.Thread(target=_prewarm_loop, daemon=True).start()
+    threading.Thread(target=_prediction_prewarm_loop, daemon=True).start()
     yield
 
 

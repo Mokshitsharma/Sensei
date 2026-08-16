@@ -35,6 +35,7 @@ _HORIZONS = {
     "1d": "1 trading day",
     "3d": "1–3 trading days",
     "5d": "3–5 trading days",
+    "7d": "5–7 trading days",
 }
 
 
@@ -87,7 +88,7 @@ def predict_news_price_impact(
     atr_scaling = atr_pct / _ATR_BASELINE   # >1 means more volatile stock
 
     # Horizon scaling: longer horizon = larger potential move
-    horizon_scale = {"1d": 0.6, "3d": 1.0, "5d": 1.4}.get(horizon, 1.0)
+    horizon_scale = {"1d": 0.6, "3d": 1.0, "5d": 1.4, "7d": 1.7}.get(horizon, 1.0)
 
     base_move_pct = (
         weighted_score

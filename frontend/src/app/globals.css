@@ -1,17 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0e17;
-  --surface: #10141f;
-  --surface-2: #151b28;
-  --border: #232a3b;
-  --foreground: #e8ecf3;
-  --muted: #8b93a7;
-  --accent: #f97316;
-  --accent-hover: #fb923c;
+  /* Deep Black & Lime — high contrast, bold, energetic (dark, default) */
+  --background: #0a0a0a;
+  --surface: #171717;
+  --surface-2: #1f1f1f;
+  --border: #2a2a2a;
+  --foreground: #e5e5e5;
+  --muted: #8a8a8a;
+  --accent: #a3e635;
+  --accent-hover: #84cc16;
   --green: #4ade80;
   --red: #f87171;
   --amber: #facc15;
+}
+
+:root[data-theme="light"] {
+  /* Light Mode: Blue & Green — clean, fresh, user friendly */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #e2e8f0;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --green: #22c55e;
+  --red: #dc2626;
+  --amber: #d97706;
 }
 
 @theme inline {
@@ -77,4 +93,172 @@ body {
 }
 .animate-glow-pulse {
   animation: glow-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes loader-msg-cycle {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  6%,
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  21% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.animate-loader-msg {
+  animation: loader-msg-cycle 12s ease-in-out infinite both;
+}
+
+@keyframes loader-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-loader-ring {
+  animation: loader-ring-spin 1.4s linear infinite;
+}
+
+@keyframes bg-chart-draw {
+  0% {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  55%,
+  100% {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+.animate-bg-chart-draw {
+  animation: bg-chart-draw 4.5s ease-in-out infinite;
+}
+
+@keyframes bg-chart-dot {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px var(--accent));
+    opacity: 0.7;
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--accent));
+    opacity: 1;
+  }
+}
+.animate-bg-chart-dot {
+  animation: bg-chart-dot 1.8s ease-in-out infinite;
+}
+
+/* Phone story animation — a looping product narrative on the landing page:
+   search & confusion -> open Sensei -> AI prediction -> profit -> screen off.
+   Each scene is an absolutely-stacked layer that cross-fades in/out at its
+   own window within one shared 20s timeline, so nothing needs JS state. */
+@keyframes story-overlay {
+  0% {
+    opacity: 1;
+  }
+  5% {
+    opacity: 0;
+  }
+  92% {
+    opacity: 0;
+  }
+  97%,
+  100% {
+    opacity: 1;
+  }
+}
+.animate-story-overlay {
+  animation: story-overlay 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes story-scene-a {
+  0%,
+  3% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  8%,
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  25%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.animate-story-scene-a {
+  animation: story-scene-a 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes story-scene-b {
+  0%,
+  23% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  28%,
+  42% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  47%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.animate-story-scene-b {
+  animation: story-scene-b 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes story-scene-c {
+  0%,
+  45% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  50%,
+  66% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  71%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.animate-story-scene-c {
+  animation: story-scene-c 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes story-scene-d {
+  0%,
+  69% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  74%,
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  95%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.animate-story-scene-d {
+  animation: story-scene-d 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }

@@ -11,6 +11,12 @@ def _validate(ticker: str) -> None:
         raise HTTPException(status_code=404, detail=f"Unknown ticker: {ticker}")
 
 
+@router.get("/quote")
+def get_quote(ticker: str):
+    _validate(ticker)
+    return to_jsonable(compute.stock_quote(ticker))
+
+
 @router.get("/price")
 def get_price(ticker: str, timeframe: str = "1y"):
     _validate(ticker)

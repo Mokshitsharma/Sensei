@@ -11,6 +11,7 @@ import src.utils.numpy_compat  # noqa: F401  (must run before any model unpickli
 import pandas as pd
 
 from src.data.nifty50 import NIFTY_50
+from src.data.nse_stocks import ALL_NSE_STOCKS
 from src.data.prices import load_prices
 from src.domain.fundamentals import load_fundamentals
 from src.data.news import get_news_signal
@@ -25,7 +26,12 @@ from src.domain.news_price_model import predict_news_price_impact
 
 from api.cache import ttl_cache
 
-TICKER_TO_COMPANY = {v: k for k, v in NIFTY_50.items()}
+# Full NSE universe first, then overlay NIFTY_50's curated display names
+# (e.g. "HDFC Bank" instead of NSE's official "HDFC Bank Limited") so the
+# well-known large-caps keep their nicer names while every other listed
+# stock is still valid/searchable.
+TICKER_TO_COMPANY = {v: k for k, v in ALL_NSE_STOCKS.items()}
+TICKER_TO_COMPANY.update({v: k for k, v in NIFTY_50.items()})
 
 
 def company_for(ticker: str) -> str:
@@ -83,6 +89,40 @@ def decision(ticker: str, timeframe: str) -> dict:
         feature_values=signals.get("feature_values"),
         company=company_for(ticker),
     )
+
+
+@ttl_cache(1800, should_cache=lambda v: v.get("current_price", 0) > 0)
+def prediction_7d(ticker: str) -> dict:
+    """Lightweight 7-day price prediction used by the home page's
+    gainers/losers and market-cap sections. Reuses the news+ATR heuristic
+    forecast (cheap: no LSTM/TCN/PPO inference) so it's feasible to compute
+    across a few dozen curated tickers per request. Cached for 30 minutes —
+    this is a directional estimate, not something that needs second-level
+    freshness."""
+    price_df = prices(ticker, "1y")
+    if price_df.empty:
+        return {"ticker": ticker, "company": company_for(ticker), "current_price": 0}
+    try:
+        atr_val = _daily_atr(price_df)
+    except Exception:
+        atr_val = float(price_df["close"].std()) * 0.1
+    fund = fundamentals(ticker)
+    current_price = fund.get("current_price") or float(price_df["close"].iloc[-1])
+    forecast = predict_news_price_impact(
+        current_price=current_price,
+        news_result=news(ticker),
+        atr=atr_val,
+        horizon="7d",
+    )
+    return {
+        "ticker": ticker,
+        "company": company_for(ticker),
+        "current_price": current_price,
+        "predicted_price": forecast["predicted_price"],
+        "expected_move_pct": forecast["expected_move_pct"],
+        "confidence": forecast["confidence"],
+        "direction": forecast["direction"],
+    }
 
 
 @ttl_cache(300)

@@ -3,7 +3,6 @@ import { Card } from "./ui/Card";
 import { Badge } from "./ui/Badge";
 import { Tabs } from "./ui/Tabs";
 import { ShapChart } from "./ShapChart";
-import { LockedSection } from "./ui/LockedOverlay";
 
 const ACTION_TONE = {
   BUY: "green",
@@ -11,13 +10,7 @@ const ACTION_TONE = {
   HOLD: "amber",
 } as const;
 
-export function AiAnalystReport({
-  decision,
-  isSignedIn,
-}: {
-  decision: Decision;
-  isSignedIn: boolean;
-}) {
+export function AiAnalystReport({ decision }: { decision: Decision }) {
   const narrative = decision.narrative;
 
   if (!narrative) {
@@ -34,25 +27,16 @@ export function AiAnalystReport({
     <Card
       title="✨ AI Analyst Report"
       badge={
-        isSignedIn ? (
-          <Badge tone={ACTION_TONE[decision.action]}>
-            {decision.action === "BUY"
-              ? "STRONG BUY"
-              : decision.action === "SELL"
-                ? "STRONG SELL"
-                : "HOLD"}
-          </Badge>
-        ) : (
-          <Badge>🔒 Locked</Badge>
-        )
+        <Badge tone={ACTION_TONE[decision.action]}>
+          {decision.action === "BUY"
+            ? "STRONG BUY"
+            : decision.action === "SELL"
+              ? "STRONG SELL"
+              : "HOLD"}
+        </Badge>
       }
     >
-      <LockedSection
-        locked={!isSignedIn}
-        title="Sign in to read the full report"
-        description="Trend, momentum, volatility, and SHAP feature analysis — free with Google."
-        minHeight={360}
-      >
+      <div>
         <p className="text-sm font-medium text-foreground mb-5">
           Verdict: {narrative.headline}
         </p>
@@ -99,7 +83,7 @@ export function AiAnalystReport({
             <p className="text-sm text-foreground">{narrative.summary}</p>
           </div>
         )}
-      </LockedSection>
+      </div>
     </Card>
   );
 }

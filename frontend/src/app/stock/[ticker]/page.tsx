@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import { api } from "@/lib/api";
 import { AppShell } from "@/components/AppShell";
 import { PriceChart } from "@/components/PriceChart";
@@ -36,12 +35,10 @@ export default async function StockDetailPage(
   const { ticker: rawTicker } = await props.params;
   const ticker = decodeURIComponent(rawTicker);
 
-  const [indices, stocks, { userId }] = await Promise.all([
+  const [indices, stocks] = await Promise.all([
     api.indices(),
     api.stocks(),
-    auth(),
   ]);
-  const isSignedIn = Boolean(userId);
 
   if (!stocks.some((s) => s.ticker === ticker)) {
     notFound();
@@ -103,7 +100,6 @@ export default async function StockDetailPage(
                       signals={analysis.signals}
                       decision={analysis.decision}
                       supportResistance={analysis.support_resistance}
-                      isSignedIn={isSignedIn}
                     />
                   ),
                 },
@@ -119,7 +115,6 @@ export default async function StockDetailPage(
                     <TradeSetupTab
                       intraday={analysis.setup.intraday}
                       swing={analysis.setup.swing}
-                      isSignedIn={isSignedIn}
                     />
                   ),
                 },
@@ -131,7 +126,6 @@ export default async function StockDetailPage(
             <AiSignalPanel
               decision={analysis.decision}
               swingSetup={analysis.setup.swing}
-              isSignedIn={isSignedIn}
             />
           </div>
         </div>

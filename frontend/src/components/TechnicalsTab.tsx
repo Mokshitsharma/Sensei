@@ -7,18 +7,16 @@ export function TechnicalsTab({
   signals,
   decision,
   supportResistance,
-  isSignedIn,
 }: {
   signals: Signals;
   decision: Decision;
   supportResistance: SrType;
-  isSignedIn: boolean;
 }) {
   return (
     <div className="space-y-5">
       <div className="grid lg:grid-cols-3 gap-5 items-start">
         <div className="lg:col-span-2">
-          <AiAnalystReport decision={decision} isSignedIn={isSignedIn} />
+          <AiAnalystReport decision={decision} />
         </div>
         <RawModelSignals signals={signals} decision={decision} />
       </div>

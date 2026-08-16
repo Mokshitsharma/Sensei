@@ -1,6 +1,5 @@
 import type { Decision, TradeSetup } from "@/lib/types";
 import { Badge } from "./ui/Badge";
-import { LockedSection } from "./ui/LockedOverlay";
 
 const TONE = {
   BUY: "green",
@@ -9,19 +8,17 @@ const TONE = {
 } as const;
 
 const GLOW_VAR = {
-  BUY: "#4ade80",
-  SELL: "#f87171",
-  HOLD: "#facc15",
+  BUY: "var(--green)",
+  SELL: "var(--red)",
+  HOLD: "var(--amber)",
 } as const;
 
 export function AiSignalPanel({
   decision,
   swingSetup,
-  isSignedIn,
 }: {
   decision: Decision;
   swingSetup: TradeSetup;
-  isSignedIn: boolean;
 }) {
   const hasLevels = !(
     swingSetup.error &&
@@ -38,12 +35,7 @@ export function AiSignalPanel({
         {(decision.confidence * 100).toFixed(1)}% confidence
       </p>
 
-      <LockedSection
-        locked={!isSignedIn}
-        title="Sign in to see the call"
-        description="BUY, SELL, or HOLD — plus entry, stop-loss, and targets. Free with Google."
-        minHeight={hasLevels ? 320 : 140}
-      >
+      <div>
         <div className="mt-3">
           <span
             className="animate-glow-pulse inline-block rounded-md"
@@ -73,7 +65,7 @@ export function AiSignalPanel({
             <LevelRow label="Validity" value={swingSetup.validity} />
           </div>
         )}
-      </LockedSection>
+      </div>
 
       <p className="mt-5 text-[11px] text-muted leading-relaxed border-t border-border pt-3">
         Informational only — Sensei AI does not place trades or connect to a

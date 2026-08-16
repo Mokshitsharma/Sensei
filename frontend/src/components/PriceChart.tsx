@@ -31,6 +31,17 @@ export function PriceChart({ records }: { records: PriceRecord[] }) {
     const container = containerRef.current;
     if (!container || records.length === 0) return;
 
+    // Read the active theme's CSS variables so the chart matches whichever
+    // theme (dark/light) is active — lightweight-charts needs literal color
+    // values, it can't consume CSS custom properties directly.
+    const style = getComputedStyle(document.documentElement);
+    const cssVar = (name: string) => style.getPropertyValue(name).trim();
+    const muted = cssVar("--muted");
+    const border = cssVar("--border");
+    const accent = cssVar("--accent");
+    const green = cssVar("--green");
+    const red = cssVar("--red");
+
     // lightweight-charts' `autoSize: true` sometimes never fires its first
     // resize if the container's width isn't stable yet at creation time
     // (e.g. still settling inside a CSS grid) — it's happened here. So
@@ -38,24 +49,24 @@ export function PriceChart({ records }: { records: PriceRecord[] }) {
     const chart = createChart(container, {
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#8b93a7",
+        textColor: muted,
       },
       grid: {
-        vertLines: { color: "#232a3b" },
-        horzLines: { color: "#232a3b" },
+        vertLines: { color: border },
+        horzLines: { color: border },
       },
-      rightPriceScale: { borderColor: "#232a3b" },
-      timeScale: { borderColor: "#232a3b", timeVisible: false },
+      rightPriceScale: { borderColor: border },
+      timeScale: { borderColor: border, timeVisible: false },
       width: container.clientWidth,
       height: CHART_HEIGHT,
     });
 
     const candles = chart.addSeries(CandlestickSeries, {
-      upColor: "#4ade80",
-      downColor: "#f87171",
+      upColor: green,
+      downColor: red,
       borderVisible: false,
-      wickUpColor: "#4ade80",
-      wickDownColor: "#f87171",
+      wickUpColor: green,
+      wickDownColor: red,
     });
     candles.setData(
       records.map((r) => ({
@@ -72,7 +83,7 @@ export function PriceChart({ records }: { records: PriceRecord[] }) {
     const ema50 = ema(closes, 50);
 
     const ema20Series = chart.addSeries(LineSeries, {
-      color: "#f97316",
+      color: accent,
       lineWidth: 1,
     });
     ema20Series.setData(
