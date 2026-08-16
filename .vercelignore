@@ -1,7 +1,0 @@
-frontend/
-data/
-exports/
-logs/
-*.log
-.venv/
-__pycache__/

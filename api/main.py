@@ -50,13 +50,8 @@ def _prediction_prewarm_loop():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Background re-warm loops assume a long-lived process (Render). On
-    # Vercel's serverless functions there's no persistent process between
-    # invocations, so these threads would just burn CPU on every cold start
-    # for no benefit — skip them there and rely on ttl_cache on-demand.
-    if not os.environ.get("VERCEL"):
-        threading.Thread(target=_prewarm_loop, daemon=True).start()
-        threading.Thread(target=_prediction_prewarm_loop, daemon=True).start()
+    threading.Thread(target=_prewarm_loop, daemon=True).start()
+    threading.Thread(target=_prediction_prewarm_loop, daemon=True).start()
     yield
 
 
