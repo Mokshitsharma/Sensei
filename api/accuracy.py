@@ -19,6 +19,13 @@ logger = logging.getLogger("sensei.accuracy")
 HORIZONS = ["1d", "7d", "30d"]
 _HORIZON_DAYS = {"1d": 1, "7d": 7, "30d": 30}
 
+# Must match the FLAT threshold in src/domain/news_price_model.py — a
+# prediction called FLAT there means "expected move under 0.3%", so the
+# actual outcome needs the same band to be judged fairly. Without this,
+# "actual == FLAT" required an exact 0.0% move (never happens in practice),
+# so every FLAT call was scored wrong regardless of how right it was.
+_FLAT_THRESHOLD_PCT = 0.3
+
 
 def _today_iso() -> str:
     return dt.date.today().isoformat()
@@ -101,7 +108,12 @@ def evaluate_due_predictions() -> int:
             if entry["price_at_prediction"]
             else 0.0
         )
-        actual_direction = "UP" if actual_move_pct > 0 else "DOWN" if actual_move_pct < 0 else "FLAT"
+        if abs(actual_move_pct) < _FLAT_THRESHOLD_PCT:
+            actual_direction = "FLAT"
+        elif actual_move_pct > 0:
+            actual_direction = "UP"
+        else:
+            actual_direction = "DOWN"
         correct = actual_direction == entry["direction"]
         updates.append((actual_price, actual_move_pct, int(correct), today, entry["id"]))
 
