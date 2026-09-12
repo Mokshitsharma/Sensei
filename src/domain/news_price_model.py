@@ -36,6 +36,7 @@ _HORIZONS = {
     "3d": "1–3 trading days",
     "5d": "3–5 trading days",
     "7d": "5–7 trading days",
+    "30d": "this month",
 }
 
 
@@ -56,7 +57,7 @@ def predict_news_price_impact(
         current_price : latest close price (₹)
         news_result   : output of analyze_news_sentiment()
         atr           : current ATR (absolute ₹ value)
-        horizon       : "1d" | "3d" | "5d"
+        horizon       : "1d" | "3d" | "5d" | "7d" | "30d"
 
     Returns dict:
         predicted_price   : float  (point estimate)
@@ -88,7 +89,9 @@ def predict_news_price_impact(
     atr_scaling = atr_pct / _ATR_BASELINE   # >1 means more volatile stock
 
     # Horizon scaling: longer horizon = larger potential move
-    horizon_scale = {"1d": 0.6, "3d": 1.0, "5d": 1.4, "7d": 1.7}.get(horizon, 1.0)
+    # Diminishing-returns scaling — news sentiment's predictive power decays
+    # well before a month out, so 30d is not a linear extrapolation of 7d.
+    horizon_scale = {"1d": 0.6, "3d": 1.0, "5d": 1.4, "7d": 1.7, "30d": 2.4}.get(horizon, 1.0)
 
     base_move_pct = (
         weighted_score

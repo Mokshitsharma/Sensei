@@ -6,8 +6,10 @@ import { SearchBar } from "./SearchBar";
 
 const NAV_ITEMS = [
   { label: "Explore", href: "/explore", enabled: true },
-  { label: "Portfolio", href: "/portfolio", enabled: false },
-  { label: "Screener", href: "/screener", enabled: false },
+  { label: "Predictions", href: "/predictions", enabled: true },
+  { label: "Predict Stock", href: "/predict", enabled: true },
+  { label: "Screener", href: "/screener", enabled: true },
+  { label: "Portfolio", href: "/portfolio", enabled: true },
 ];
 
 export async function TopBar({ stocks }: { stocks: StockListItem[] }) {

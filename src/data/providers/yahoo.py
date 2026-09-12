@@ -2,7 +2,6 @@
 
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta
 
 from src.data.providers.base import PriceProvider
 from src.utils.data import sanitize_ohlcv
@@ -10,14 +9,10 @@ from src.utils.data import sanitize_ohlcv
 
 class YahooProvider(PriceProvider):
 
-    def fetch_daily_ohlcv(self, symbol: str) -> pd.DataFrame:
-        end = datetime.today()
-        start = end - timedelta(days=365)
-
+    def fetch_daily_ohlcv(self, symbol: str, period: str = "1y") -> pd.DataFrame:
         df = yf.download(
             symbol,
-            start=start.strftime("%Y-%m-%d"),
-            end=end.strftime("%Y-%m-%d"),
+            period=period,
             progress=False,
         )
 

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from src.ml.model import load_model, predict, predict_proba
+from src.utils.config import FEATURE_COLUMNS
 
 
 def predict_next_week(
@@ -27,14 +28,11 @@ def predict_next_week(
             "confidence": 0.0,
         }
 
-    feature_cols = [
-        c for c in df.columns
-        if c not in (
-            "future_return_5d",
-            "future_direction_5d",
-            "date",
-        )
-    ]
+    # Must match the exact 9-column schema the model was trained on
+    # (src/utils/config.py FEATURE_COLUMNS) — not "every other column",
+    # which previously leaked in raw OHLCV/volume and broke SHAP (which
+    # already explains the model against this same canonical list).
+    feature_cols = [c for c in FEATURE_COLUMNS if c in df.columns]
 
     latest_X = df[feature_cols].iloc[-1:].values
     y_pred = predict(model, latest_X)[0]

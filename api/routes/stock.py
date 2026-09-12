@@ -63,6 +63,15 @@ def get_backtest(ticker: str, timeframe: str = "1y"):
     return to_jsonable(compute.backtest(ticker, timeframe))
 
 
+@router.get("/outlook")
+def get_outlook(ticker: str, horizon: str = "30d"):
+    _validate(ticker)
+    valid_horizons = {"1d", "7d", "30d", "90d", "180d", "365d", "730d"}
+    if horizon not in valid_horizons:
+        raise HTTPException(status_code=400, detail=f"horizon must be one of {sorted(valid_horizons)}")
+    return to_jsonable(compute.outlook(ticker, horizon))
+
+
 @router.get("/analysis")
 def get_analysis(ticker: str, timeframe: str = "1y"):
     """Combined endpoint mirroring what the Streamlit detail view renders:

@@ -27,3 +27,7 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Local SQLite persistence (prediction-accuracy log, paper trading)
+data/sensei.db
+data/sensei.db-*

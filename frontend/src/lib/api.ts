@@ -1,20 +1,52 @@
 import type {
+  AccuracyHorizon,
+  AccuracySummary,
   Analysis,
   BacktestResponse,
+  CapSegment,
   Fundamentals,
   Indices,
+  MoverPrediction,
+  MoversResponse,
   NewsResponse,
+  Outlook,
+  OutlookHorizon,
+  PaperTrade,
+  Portfolio,
   PopularStock,
+  PredictionHorizon,
   PriceResponse,
   Quote,
+  ScreenFilter,
+  ScreenInfo,
+  ScreenerRow,
   StockListItem,
   TradeSetup,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+async function get<T>(path: string, token?: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    cache: "no-store",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  if (!res.ok) {
+    throw new Error(`API ${path} failed: ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+async function post<T>(path: string, body: unknown, token: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) {
     throw new Error(`API ${path} failed: ${res.status}`);
   }
@@ -46,4 +78,25 @@ export const api = {
     get<BacktestResponse>(
       `/api/stocks/${encodeURIComponent(ticker)}/backtest?timeframe=${timeframe}`
     ),
+  movers: () => get<MoversResponse>("/api/stocks/movers"),
+  byCap: (segment: CapSegment) =>
+    get<MoverPrediction[]>(`/api/stocks/by-cap?segment=${segment}`),
+  screens: () => get<ScreenInfo[]>("/api/screener/screens"),
+  screener: (filter: ScreenFilter, segment: CapSegment | "all" = "all") =>
+    get<ScreenerRow[]>(`/api/screener?filter=${filter}&segment=${segment}`),
+  predictionsAccuracy: (horizon?: AccuracyHorizon, limit = 100) =>
+    get<AccuracySummary>(
+      `/api/predictions/accuracy?limit=${limit}${horizon ? `&horizon=${horizon}` : ""}`
+    ),
+  predictions: (horizon: PredictionHorizon, direction: "UP" | "DOWN" | "FLAT" | "ALL" = "ALL") =>
+    get<MoverPrediction[]>(`/api/predictions?horizon=${horizon}&direction=${direction}`),
+  outlook: (ticker: string, horizon: OutlookHorizon) =>
+    get<Outlook>(`/api/stocks/${encodeURIComponent(ticker)}/outlook?horizon=${horizon}`),
+  portfolio: (token: string) => get<Portfolio>("/api/portfolio", token),
+  portfolioHistory: (token: string) =>
+    get<PaperTrade[]>("/api/portfolio/history", token),
+  trade: (
+    token: string,
+    body: { ticker: string; side: "BUY" | "SELL"; quantity: number }
+  ) => post<PaperTrade>("/api/portfolio/trade", body, token),
 };

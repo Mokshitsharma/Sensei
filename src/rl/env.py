@@ -1,5 +1,7 @@
 # src/rl/env.py
 
+import random
+
 import gymnasium as gym
 import numpy as np
 import pandas as pd
@@ -58,16 +60,18 @@ class TradingEnv(gym.Env):
         self.net_worth = self.initial_balance
         self.max_net_worth = self.initial_balance
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         self._reset_state()
-        return self._get_observation()
+        return self._get_observation(), {}
 
     def _get_observation(self) -> np.ndarray:
         obs = self.df.loc[self.current_step, self.feature_cols].values
         return obs.astype(np.float32)
 
     def step(self, action: int):
-        done = False
+        terminated = False
+        truncated = False
         price = self.df.loc[self.current_step, "close"]
 
         prev_net_worth = self.net_worth
@@ -105,9 +109,12 @@ class TradingEnv(gym.Env):
         # -----------------------
         self.current_step += 1
         if self.current_step >= len(self.df) - 1:
-            done = True
+            terminated = True
 
-        obs = self._get_observation() if not done else None
+        # Always a real observation (never None) — current_step is still a
+        # valid row index at termination, and SB3's VecEnv stores this
+        # exact return as `terminal_observation` for value bootstrapping.
+        obs = self._get_observation()
 
         info = {
             "net_worth": self.net_worth,
@@ -115,7 +122,7 @@ class TradingEnv(gym.Env):
             "position": self.position,
         }
 
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def render(self, mode="human") -> None:
         print(
@@ -123,3 +130,47 @@ class TradingEnv(gym.Env):
             f"Net Worth: {self.net_worth:.2f} | "
             f"Position: {self.position:.4f}"
         )
+
+
+class MultiTickerTradingEnv(gym.Env):
+    """Wraps one TradingEnv per ticker and picks a random one on each
+    reset(), so a single PPO agent trains across every stock's price
+    history instead of just one. Each episode still runs entirely within
+    one ticker's data — only episode *selection* is pooled, never a single
+    episode's steps mixing tickers."""
+
+    metadata = {"render.modes": ["human"]}
+
+    def __init__(
+        self,
+        dfs: List[pd.DataFrame],
+        feature_cols: List[str],
+        initial_balance: float = 100_000.0,
+        transaction_cost: float = 0.001,
+    ) -> None:
+        super().__init__()
+        if not dfs:
+            raise ValueError("MultiTickerTradingEnv needs at least one ticker's data")
+
+        self.envs = [
+            TradingEnv(
+                df=df,
+                feature_cols=feature_cols,
+                initial_balance=initial_balance,
+                transaction_cost=transaction_cost,
+            )
+            for df in dfs
+        ]
+        self.action_space = self.envs[0].action_space
+        self.observation_space = self.envs[0].observation_space
+        self.active: TradingEnv = self.envs[0]
+
+    def reset(self, seed=None, options=None):
+        self.active = random.choice(self.envs)
+        return self.active.reset(seed=seed, options=options)
+
+    def step(self, action: int):
+        return self.active.step(action)
+
+    def render(self, mode="human") -> None:
+        self.active.render(mode)

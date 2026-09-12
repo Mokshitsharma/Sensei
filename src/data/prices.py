@@ -17,10 +17,16 @@ from src.data.providers.yahoo import YahooProvider
 def load_prices(ticker: str, timeframe: str):
     """
     Load price data using Yahoo only (stable across local & cloud).
+    `timeframe` is a yfinance period string (e.g. "1y", "2y", "5y") for the
+    daily case.
     """
 
     yahoo = YahooProvider()
-    df = yahoo.fetch_daily_ohlcv(ticker)
+
+    if timeframe.endswith(("m", "h")) and not timeframe.endswith(("mo",)):
+        df = yahoo.fetch_intraday_ohlcv(ticker, timeframe)
+    else:
+        df = yahoo.fetch_daily_ohlcv(ticker, period=timeframe)
 
     if df.empty:
         raise ValueError(f"No price data available for {ticker}")

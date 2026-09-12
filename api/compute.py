@@ -72,9 +72,9 @@ def signal_pipeline(ticker: str, timeframe: str) -> dict:
         price_df=prices(ticker, timeframe),
         fundamentals=fundamentals(ticker),
         company=company_for(ticker),
-        lstm_model_path="models/lstm_HDFCBANK_NS.pt",
-        tcn_model_path="models/tcn_HDFCBANK_NS.pt",
-        ppo_model_path="models/ppo_hdfc.zip",
+        lstm_model_path="models/lstm_general.pt",
+        tcn_model_path="models/tcn_general.pt",
+        ppo_model_path="models/ppo_general.zip",
     )
 
 
@@ -92,13 +92,11 @@ def decision(ticker: str, timeframe: str) -> dict:
 
 
 @ttl_cache(1800, should_cache=lambda v: v.get("current_price", 0) > 0)
-def prediction_7d(ticker: str) -> dict:
-    """Lightweight 7-day price prediction used by the home page's
-    gainers/losers and market-cap sections. Reuses the news+ATR heuristic
-    forecast (cheap: no LSTM/TCN/PPO inference) so it's feasible to compute
-    across a few dozen curated tickers per request. Cached for 30 minutes —
-    this is a directional estimate, not something that needs second-level
-    freshness."""
+def prediction_at_horizon(ticker: str, horizon: str = "7d") -> dict:
+    """News+ATR heuristic price prediction at a given horizon (1d/3d/5d/7d/30d).
+    Cheap (no torch/sklearn inference), used for the gainers/losers, by-cap,
+    and AI Prediction tab sections — feasible to run across a few dozen
+    curated tickers per request. Cached 30 minutes per (ticker, horizon)."""
     price_df = prices(ticker, "1y")
     if price_df.empty:
         return {"ticker": ticker, "company": company_for(ticker), "current_price": 0}
@@ -112,16 +110,96 @@ def prediction_7d(ticker: str) -> dict:
         current_price=current_price,
         news_result=news(ticker),
         atr=atr_val,
-        horizon="7d",
+        horizon=horizon,
     )
+    quote = stock_quote(ticker)
     return {
         "ticker": ticker,
         "company": company_for(ticker),
         "current_price": current_price,
+        "today_change_pct": quote["pct"] if quote else 0.0,
         "predicted_price": forecast["predicted_price"],
         "expected_move_pct": forecast["expected_move_pct"],
         "confidence": forecast["confidence"],
         "direction": forecast["direction"],
+        "horizon_label": forecast["horizon_label"],
+    }
+
+
+def prediction_7d(ticker: str) -> dict:
+    """Back-compat alias — gainers/losers/by-cap sections default to 7d."""
+    return prediction_at_horizon(ticker, "7d")
+
+
+# Horizons the news+ATR heuristic can honestly price a target for. Beyond
+# this, sentiment/technical signals have no real predictive grounding, so
+# outlook() switches to a qualitative narrative instead of fabricating a
+# price number that scales indefinitely with time.
+_QUANTITATIVE_HORIZONS = {"1d", "7d", "30d"}
+
+_OUTLOOK_HORIZON_LABELS = {
+    "1d": "Tomorrow", "7d": "1 Week", "30d": "1 Month", "90d": "3 Months",
+    "180d": "6 Months", "365d": "1 Year", "730d": "2 Years",
+}
+
+
+@ttl_cache(600)
+def outlook(ticker: str, horizon: str) -> dict:
+    """Powers the Predict-a-Stock tab. For horizons the news+ATR model can
+    support (<=1 month), returns a real price target. Beyond that, returns
+    a qualitative directional narrative (decision + SHAP drivers + regime +
+    news) with no price number — the underlying models (LSTM/TCN: 5-day,
+    news heuristic: up to ~1 month) have no basis for a multi-month price,
+    and showing one would misrepresent what the AI actually knows."""
+    horizon_label = _OUTLOOK_HORIZON_LABELS.get(horizon, horizon)
+    signals = signal_pipeline(ticker, "1y")
+    dec = decision(ticker, "1y")
+    fund = fundamentals(ticker)
+    news_result = news(ticker)
+
+    base = {
+        "ticker": ticker,
+        "company": company_for(ticker),
+        "horizon": horizon,
+        "horizon_label": horizon_label,
+        "current_price": fund.get("current_price", 0),
+        "decision": {
+            "action": dec["action"],
+            "confidence": dec["confidence"],
+            "narrative": dec.get("narrative"),
+        },
+        "shap_ranked": dec.get("shap_ranked", []),
+        "regime": signals.get("regime"),
+        "fundamentals": fund,
+        "news_summary": {
+            "sentiment_score": news_result.get("sentiment_score"),
+            "bull_count": news_result.get("bull_count"),
+            "bear_count": news_result.get("bear_count"),
+            "top_bullish": news_result.get("top_bullish"),
+            "top_bearish": news_result.get("top_bearish"),
+        },
+    }
+
+    if horizon in _QUANTITATIVE_HORIZONS:
+        forecast = prediction_at_horizon(ticker, horizon)
+        return {
+            **base,
+            "mode": "quantitative",
+            "predicted_price": forecast["predicted_price"],
+            "expected_move_pct": forecast["expected_move_pct"],
+            "direction": forecast["direction"],
+            "price_confidence": forecast["confidence"],
+        }
+
+    return {
+        **base,
+        "mode": "qualitative",
+        "disclaimer": (
+            f"Sensei AI's models forecast up to ~1 month out — there is no "
+            f"price target for {horizon_label}. What follows is the current "
+            f"technical and fundamental picture with relevant news themes, "
+            f"as directional context only, not a price forecast."
+        ),
     }
 
 

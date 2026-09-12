@@ -105,8 +105,8 @@ def run_signal_pipeline(
     )
 
     agent = PPOTradingAgent(env, model_path=ppo_model_path)
-    obs = env.reset()
-   
+    obs, _ = env.reset()
+
     obs = np.array(obs, dtype=np.float32)
 
     # Replace NaN / inf

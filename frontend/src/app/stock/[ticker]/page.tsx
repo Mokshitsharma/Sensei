@@ -10,6 +10,8 @@ import { OverviewTab } from "@/components/OverviewTab";
 import { TechnicalsTab } from "@/components/TechnicalsTab";
 import { NewsPanel } from "@/components/NewsPanel";
 import { TradeSetupTab } from "@/components/TradeSetupTab";
+import { RecentlyVisitedTracker } from "@/components/RecentlyVisitedTracker";
+import { PaperTradePanel } from "@/components/PaperTradePanel";
 
 export async function generateMetadata(
   props: PageProps<"/stock/[ticker]">
@@ -56,6 +58,7 @@ export default async function StockDetailPage(
 
   return (
     <AppShell indices={indices} stocks={stocks}>
+      <RecentlyVisitedTracker ticker={ticker} name={analysis.company} />
       <div className="mx-auto max-w-6xl px-6 py-8">
         <Link href="/explore" className="text-sm text-muted hover:text-foreground">
           ← Back to Explore
@@ -122,10 +125,15 @@ export default async function StockDetailPage(
             />
           </div>
 
-          <div className="order-first lg:order-last">
+          <div className="order-first lg:order-last space-y-6">
             <AiSignalPanel
               decision={analysis.decision}
               swingSetup={analysis.setup.swing}
+            />
+            <PaperTradePanel
+              ticker={ticker}
+              currentPrice={fundamentals.current_price}
+              suggestedEntry={analysis.setup.swing.entry_zone?.[0]}
             />
           </div>
         </div>

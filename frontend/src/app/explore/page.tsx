@@ -1,13 +1,15 @@
 import { api } from "@/lib/api";
 import { AppShell } from "@/components/AppShell";
-import { StockCard } from "@/components/StockCard";
+import { RecentlyVisitedRow } from "@/components/explore/RecentlyVisitedRow";
+import { MoversRow } from "@/components/explore/MoversRow";
+import { PredictionAccuracyRow } from "@/components/explore/PredictionAccuracyRow";
 
 export default async function ExplorePage() {
   const start = performance.now();
-  const [indices, stocks, popular] = await Promise.all([
+  const [indices, stocks, byCapLarge] = await Promise.all([
     api.indices(),
     api.stocks(),
-    api.popularStocks(),
+    api.byCap("large"),
   ]);
   const latencyMs = Math.round(performance.now() - start);
 
@@ -24,26 +26,28 @@ export default async function ExplorePage() {
           </span>
         </div>
 
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-lg font-semibold">Algorithmic Radar</h1>
-          <span className="rounded-md border border-border bg-surface-2 px-2 py-1 text-xs text-muted">
-            Large-cap focus
-          </span>
-        </div>
+        <h1 className="text-lg font-semibold mb-1">Explore</h1>
         <p className="text-sm text-muted mb-6">
-          AI-scored signals across India&apos;s most-traded large-cap stocks.
+          AI-scored signals across India&apos;s most-traded stocks.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {popular.map((stock, i) => (
-            <StockCard key={stock.ticker} stock={stock} index={i} />
-          ))}
-        </div>
+        <RecentlyVisitedRow />
 
-        <p className="mt-8 text-center text-xs text-muted">
-          More stocks, IPOs, and mutual funds are coming soon to the
-          intelligence engine.
-        </p>
+        <MoversRow
+          title="Top Gainers Today"
+          type="gainers"
+          initialSegment="large"
+          initialData={byCapLarge}
+        />
+
+        <MoversRow
+          title="Top Losers Today"
+          type="losers"
+          initialSegment="large"
+          initialData={byCapLarge}
+        />
+
+        <PredictionAccuracyRow />
       </div>
     </AppShell>
   );
