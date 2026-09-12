@@ -166,3 +166,60 @@ def get_accuracy(horizon: Optional[str] = None, limit: int = 100) -> dict:
         "pending": pending,
         "rows": rows,
     }
+
+
+def get_accuracy_breakdown() -> dict:
+    """Aggregate view for presenting the track record honestly: accuracy
+    per horizon (each with its own sample size, since a small-sample
+    horizon shouldn't be read the same as a well-sampled one), plus a
+    cumulative accuracy-over-time series so the trend — not a single
+    point-in-time number — is what gets shown."""
+    by_horizon = []
+    for horizon in HORIZONS:
+        with db.cursor() as cur:
+            cur.execute(
+                "SELECT COUNT(*), SUM(correct) FROM prediction_log WHERE evaluated_at IS NOT NULL AND horizon = ?",
+                (horizon,),
+            )
+            total, correct = cur.fetchone()
+            total = total or 0
+            correct = correct or 0
+            cur.execute(
+                "SELECT COUNT(*) FROM prediction_log WHERE evaluated_at IS NULL AND horizon = ?",
+                (horizon,),
+            )
+            pending = cur.fetchone()[0]
+        by_horizon.append({
+            "horizon": horizon,
+            "total": total,
+            "correct": correct,
+            "pct_correct": (correct / total * 100) if total else None,
+            "pending": pending,
+        })
+
+    with db.cursor() as cur:
+        cur.execute(
+            """SELECT evaluated_at, COUNT(*) as n, SUM(correct) as correct
+               FROM prediction_log
+               WHERE evaluated_at IS NOT NULL
+               GROUP BY evaluated_at
+               ORDER BY evaluated_at ASC"""
+        )
+        daily = [dict(r) for r in cur.fetchall()]
+
+    trend = []
+    cum_total = 0
+    cum_correct = 0
+    for day in daily:
+        cum_total += day["n"]
+        cum_correct += day["correct"] or 0
+        trend.append({
+            "date": day["evaluated_at"],
+            "day_total": day["n"],
+            "day_correct": day["correct"] or 0,
+            "cumulative_total": cum_total,
+            "cumulative_correct": cum_correct,
+            "cumulative_pct_correct": round(cum_correct / cum_total * 100, 1) if cum_total else None,
+        })
+
+    return {"by_horizon": by_horizon, "trend": trend}

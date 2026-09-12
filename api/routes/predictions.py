@@ -19,6 +19,11 @@ def get_predictions_accuracy(horizon: str | None = None, limit: int = 100):
     return accuracy.get_accuracy(horizon=horizon, limit=limit)
 
 
+@router.get("/predictions/accuracy/breakdown")
+def get_predictions_accuracy_breakdown():
+    return accuracy.get_accuracy_breakdown()
+
+
 @ttl_cache(1800)
 def _predictions_at_horizon(horizon: str) -> list[dict]:
     tickers = list(_MOVERS_UNIVERSE.values())

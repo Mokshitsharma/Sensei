@@ -259,6 +259,28 @@ export type AccuracySummary = {
   rows: AccuracyRow[];
 };
 
+export type AccuracyByHorizon = {
+  horizon: AccuracyHorizon;
+  total: number;
+  correct: number;
+  pct_correct: number | null;
+  pending: number;
+};
+
+export type AccuracyTrendPoint = {
+  date: string;
+  day_total: number;
+  day_correct: number;
+  cumulative_total: number;
+  cumulative_correct: number;
+  cumulative_pct_correct: number | null;
+};
+
+export type AccuracyBreakdown = {
+  by_horizon: AccuracyByHorizon[];
+  trend: AccuracyTrendPoint[];
+};
+
 export type PortfolioPosition = {
   ticker: string;
   company: string;

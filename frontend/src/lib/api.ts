@@ -1,4 +1,5 @@
 import type {
+  AccuracyBreakdown,
   AccuracyHorizon,
   AccuracySummary,
   Analysis,
@@ -88,6 +89,8 @@ export const api = {
     get<AccuracySummary>(
       `/api/predictions/accuracy?limit=${limit}${horizon ? `&horizon=${horizon}` : ""}`
     ),
+  predictionsAccuracyBreakdown: () =>
+    get<AccuracyBreakdown>("/api/predictions/accuracy/breakdown"),
   predictions: (horizon: PredictionHorizon, direction: "UP" | "DOWN" | "FLAT" | "ALL" = "ALL") =>
     get<MoverPrediction[]>(`/api/predictions?horizon=${horizon}&direction=${direction}`),
   outlook: (ticker: string, horizon: OutlookHorizon) =>
