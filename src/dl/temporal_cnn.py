@@ -1,5 +1,7 @@
 # src/dl/temporal_cnn.py
 
+import functools
+
 import torch
 import torch.nn as nn
 from typing import List
@@ -135,11 +137,14 @@ def save_model(model: nn.Module, path: str) -> None:
     torch.save(model.state_dict(), path)
 
 
+@functools.lru_cache(maxsize=None)
 def load_model(
     path: str,
     num_features: int,
     device: str = "cpu",
 ) -> TemporalCNN:
+    """Cached per (path, num_features, device) — see src/dl/lstm.py's
+    load_model for why."""
     model = TemporalCNN(num_features=num_features)
     model.load_state_dict(torch.load(path, map_location=device))
     model.eval()

@@ -1,5 +1,6 @@
 # src/ml/model.py
 
+import functools
 from typing import Literal
 from pathlib import Path
 import joblib
@@ -117,11 +118,15 @@ def save_model(
     return path
 
 
+@functools.lru_cache(maxsize=None)
 def load_model(
     name: str,
 ):
     """
-    Load persisted model.
+    Load persisted model. Cached per name — this is called on every
+    /analysis request (directly, and via src/ml/predict.py), and
+    joblib.load() of a multi-MB Random Forest is not free to repeat.
+    Inference-only use, so sharing one instance across requests is safe.
     """
     path = MODEL_DIR / f"{name}.joblib"
     if not path.exists():

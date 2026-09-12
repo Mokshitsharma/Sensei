@@ -1,5 +1,7 @@
 # src/dl/lstm.py
 
+import functools
+
 import torch
 import torch.nn as nn
 from typing import Tuple
@@ -133,11 +135,16 @@ def save_model(model: nn.Module, path: str) -> None:
     torch.save(model.state_dict(), path)
 
 
+@functools.lru_cache(maxsize=None)
 def load_model(
     path: str,
     num_features: int,
     device: str = "cpu",
 ) -> LSTMPricePredictor:
+    """Cached per (path, num_features, device) — every /analysis request was
+    re-reading and re-deserializing these weights from disk, which is most
+    of why a cold request took ~30s. Inference-only (.eval()), so sharing
+    one instance across requests is safe."""
     model = LSTMPricePredictor(num_features=num_features)
     import os
     if not os.path.exists(path) or os.path.getsize(path) == 0:
