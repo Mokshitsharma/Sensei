@@ -1,3 +1,13 @@
+---
+title: Sensei AI API
+emoji: 🧠
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 🧠 Sensei AI — Intelligent Stock Analysis Platform
 
 > **Institutional-grade AI trading intelligence for all 50 Nifty stocks, built for retail investors.**

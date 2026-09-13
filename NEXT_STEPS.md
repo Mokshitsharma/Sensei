@@ -8,22 +8,42 @@ ship and grow this.
 
 ## 1. Deploy (the immediate next step)
 
-- [ ] Pick a backend host — **Render** or **Hugging Face Spaces** (both
-      have a free tier and build the `Dockerfile` server-side). Render is
-      simpler to set up; HF Spaces is purpose-built for ML workloads like
-      this one. Neither has been tried yet — the `Dockerfile` itself was
-      never build-tested locally (no Docker installed on the dev machine).
-- [ ] Deploy the backend, get its public URL.
-- [ ] Deploy `frontend/` to Vercel (connect the GitHub repo).
-- [ ] Set env vars on Vercel: `NEXT_PUBLIC_API_URL` (the backend's real
-      URL) and `NEXT_PUBLIC_SITE_URL` (the Vercel URL, or a custom domain).
+- [x] Backend host decided: **Hugging Face Spaces** (Docker SDK), not
+      Render. Render's free tier is 512MB RAM; this backend loads
+      PyTorch + scikit-learn + Stable-Baselines3 at once, which already
+      OOM-killed the *local* dev process twice on an 8GB machine. HF
+      Spaces' free CPU tier gives 16GB RAM, which is the realistic
+      minimum for this to stay up. `README.md` now carries the YAML
+      front-matter (`sdk: docker`, `app_port: 7860`) HF Spaces needs to
+      recognize the repo when synced from GitHub — the `Dockerfile`
+      already listens on `$PORT`/7860, so no other change was needed.
+      Still never build-tested locally (no Docker installed on the dev
+      machine) — the first real build happens on HF's infrastructure.
+- [ ] Create the Space (Docker SDK), sync it from the GitHub repo, deploy.
+- [ ] **Known limitation to accept or fix before relying on it**: HF
+      Spaces' free tier has ephemeral storage — `data/sensei.db` (the
+      prediction-accuracy log and paper-trading accounts/positions)
+      resets on every Space restart/rebuild. Fine for demoing, not fine
+      for an accuracy track record you want to accumulate for weeks —
+      revisit with a persistent volume (paid) or an external free DB
+      (e.g. the Supabase free tier already scoped for paper trading in
+      `PLAN_2026-08-16.md`) before that data needs to survive long-term.
+- [ ] Deploy `frontend/` to Vercel (project already linked —
+      `frontend/.vercel/project.json` — connect the GitHub repo with
+      **Root Directory set to `frontend/`**, it's a subfolder).
+- [ ] Set env vars on Vercel: `NEXT_PUBLIC_API_URL` (the HF Space URL)
+      and `NEXT_PUBLIC_SITE_URL` (the Vercel URL, or a custom domain).
       See `frontend/.env.example` for what's needed.
-- [ ] Set `ALLOWED_ORIGINS` on the backend to the real Vercel URL once
+- [ ] Set `ALLOWED_ORIGINS` on the HF Space to the real Vercel URL once
       known (currently defaults to `*`, open to any origin — fine for
-      testing, should be locked down once the frontend domain is fixed).
+      testing, should be locked down once the frontend domain is fixed),
+      and set `SENSEI_ENABLE_PREWARM=1` (off by default; re-enable now
+      that model loading is cached, see the caching-fix commit).
 - [ ] Smoke-test the deployed site end to end: home page loads, search
       works, a stock detail page loads (first load will be slow — cold
-      ML pipeline — confirm the pre-warm loop kicks in afterward).
+      ML pipeline — confirm the pre-warm loop kicks in afterward), and
+      watch the Space's Logs tab for memory pressure during that first
+      cold request — this is the real test of whether the free tier holds.
 
 ## 2. IPO section (discussed, not built)
 
