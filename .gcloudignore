@@ -1,0 +1,16 @@
+# What gets uploaded to Cloud Build when running `gcloud run deploy --source .`
+# Mirrors .dockerignore's intent, plus repo-only cruft the build never needs.
+.gcloudignore
+.git/
+.venv/
+frontend/
+__pycache__/
+*.pyc
+*.log
+.streamlit/
+app.py
+data/
+logs/
+exports/
+.devcontainer/
+.claude/
