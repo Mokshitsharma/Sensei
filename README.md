@@ -8,27 +8,38 @@ app_port: 7860
 pinned: false
 ---
 
-# 🧠 Sensei AI — Intelligent Stock Analysis Platform
+<!-- readme-refresh 2026-11 -->
+<div align="center">
 
-> **Institutional-grade AI trading intelligence for all 50 Nifty stocks, built for retail investors.**
+# 📈 Sensei
 
-![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square&logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.32-red?style=flat-square&logo=streamlit)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.2-orange?style=flat-square&logo=pytorch)
-![Stable-Baselines3](https://img.shields.io/badge/SB3-2.3-purple?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+**Trading-intelligence research for Nifty 50 stocks, for education**
+
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" /> <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch" /> <img src="https://img.shields.io/badge/FinBERT-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="FinBERT" /> <img src="https://img.shields.io/badge/LightGBM-02569B?style=for-the-badge" alt="LightGBM" /> <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn" /> <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" /> <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit" />
+
+</div>
+
+## ✨ Highlights
+
+- Five model families vote on one explainable BUY, SELL or HOLD signal
+- SHAP feature attribution and FinBERT news sentiment
+- Paper trading, a screener and a public prediction-accuracy record
+- For education only, not investment advice
+
+<!-- body -->
+> **Educational stock analysis platform exploring multi-model AI for Nifty 50 stocks.**
 
 ---
 
 ## 📌 Problem Statement
 
-Retail investors in India have no access to the same level of AI-powered trading intelligence that institutional players use. They rely on tips, basic charts, and gut feeling — with no unified, explainable system that combines technical analysis, deep learning, reinforcement learning, and real-time news sentiment into a single decision. The result is uninformed trades, poor risk management, and missed opportunities across the Nifty 50.
+Retail market analysis often relies on fragmented tools or single indicators without a unified framework. Sensei AI is an educational exploration into combining technical analysis, deep learning, reinforcement learning, regime detection, and news sentiment into a single explainable interface. Rigorous walk-forward backtests show that this multi-model approach does not outperform simple buy-and-hold; it serves as a transparent educational benchmark rather than an alpha generator.
 
 ---
 
 ## 💡 My Solution
 
-Sensei AI is a real-time stock analysis platform that unifies **five AI model families** with **financial NLP**, **multi-method Support & Resistance detection**, and a **plain-English Market Narrator** to deliver actionable, explainable BUY / SELL / HOLD decisions for all 50 Nifty stocks.
+Sensei AI is a stock analysis platform that unifies **five AI model families** with **financial NLP**, **multi-method Support & Resistance detection**, and a **plain-English Market Narrator** to deliver actionable, explainable BUY / SELL / HOLD decisions for all 50 Nifty stocks.
 
 A **scored voting decision engine** (range: −5.0 to +5.0) aggregates signals from:
 - Classical ML (Random Forest + SHAP)
@@ -51,6 +62,65 @@ The output includes confidence score, SHAP-based feature attribution, intraday/s
 | PPO Agent (Stable-Baselines3) | Reinforcement Learning | BUY / SELL / HOLD action |
 | GaussianHMM (hmmlearn) | Regime Detection | BULL / BEAR market state |
 | FinBERT (HuggingFace) | Financial NLP | Weighted sentiment score (−1 to +1) |
+
+### Walk-Forward Out-of-Sample Backtest Results
+
+<!-- RESULTS:START -->
+Walk-forward out-of-sample backtest, 2018-01-01 to 2026-09-30 (2161 trading days, 45 Nifty 50 tickers, 20 bps per side). 95% CIs: stationary bootstrap (10,000 resamples, mean block 21 days, seed 20261026). Run `20261027-111713-backtest-walkforward`.
+
+| Strategy | Sharpe [95% CI] | Max drawdown [95% CI] | Total return | Sharpe minus B&H [95% CI] |
+|---|---|---|---|---|
+| Buy-and-hold (equal weight) | 0.93 [0.19, 1.78] | -36.2% [-58.6%, -16.6%] | 282.3% | - |
+| Random Forest | 0.79 [0.07, 1.61] | -34.4% [-55.9%, -15.1%] | 161.9% | -0.14 [-0.35, 0.10] |
+| RF + HMM | 0.20 [-0.46, 1.00] | -19.8% [-36.9%, -6.9%] | 9.5% | -0.73 [-1.23, -0.19] |
+
+- RF 5-day directional hit rate: 52.9% [52.0%, 53.7%] (n = 97,020 ticker-days); always-predict-up baseline: 53.2% [52.3%, 54.2%]; difference -0.4% [-0.7%, -0.1%].
+- Binomial test vs always-up baseline (53.2%, non-overlapping 5-day windows, n = 19,440): hit rate 53.5%, p = 0.455.
+- Random Forest: permutation test vs randomly shifted signals p = 0.552 (shuffled signals, zero cost: p = 0.469); per-ticker Sharpe minus B&H -0.10 [-0.12, -0.08], wins 3/45, Wilcoxon p = 6.25e-12. **Verdict: does NOT beat buy-and-hold (Sharpe diff CI includes or is below 0).**
+- RF + HMM: permutation test vs randomly shifted signals p = 0.222 (shuffled signals, zero cost: p = 0.525); per-ticker Sharpe minus B&H -0.53 [-0.63, -0.43], wins 1/45, Wilcoxon p = 1.14e-13. **Verdict: does NOT beat buy-and-hold (Sharpe diff CI includes or is below 0).**
+
+Full numbers: `results/runs/20261027-111713-backtest-walkforward/report.md` and `metrics.json`.
+<!-- RESULTS:END -->
+
+### Limitations
+
+- **Survivorship bias:** The backtest universe applies today's Nifty 50 constituents retrospectively from 2018 to 2026 (and only the 45 tickers with continuous price history across the window), ignoring historical index additions and deletions.
+- **Execution cost assumptions:** A flat 20 bps cost per side is assumed with no slippage or market impact modeled; real-world execution in volatile conditions would degrade net performance further.
+- **No demonstrated edge over buy-and-hold:** The strategy fails to achieve a statistically significant edge over equal-weight buy-and-hold; the paired Sharpe difference 95% bootstrap confidence interval includes zero and is predominantly negative.
+- **Educational and research use only:** Not investment advice, a recommendation, or an offer to buy/sell securities. Past backtest results do not guarantee future live performance.
+
+### Price-Target Win Rate (goal: 80%)
+
+**Result: the 80% goal is not met.** No horizon reached 80% on the held-out test.
+
+A price target is a level k × σ√h away from today's close (σ = 21-day daily volatility, k ∈ {0.5, 1, 1.5, 2}), on the up or down side. It wins when the daily high (or low) touches it within h trading days. One LightGBM classifier per (side, k) predicts the touch; isotonic calibration and a threshold picked on cross-validation decide what is published. Guards: targets closer than 0.5σ√h never count; baselines are the touch rate at the same distance with no model; coverage is reported with every win rate; at most 50 Optuna trials per horizon; the test window was evaluated once with frozen configs.
+
+| Horizon | CV win rate (coverage) | Test win rate (coverage) | Test baseline | Test edge [95% CI] |
+|---|---|---|---|---|
+| 1 day | 80.5% (8.0%) | 75.7% (5.2%) | 56.8% | +18.9 pp [+14.5, +22.0] |
+| 1 week | not reachable on CV | nothing published | – | – |
+| 2 weeks | 80.9% (0.8%) | 71.1% (5.3%) | 60.9% | +10.2 pp [+2.9, +16.6] |
+| 1 month | 82.8% (1.0%) | 73.2% (9.2%) | 62.2% | +11.0 pp [−3.3, +20.3] |
+
+- Test: 2024-09-25 to 2026-11-09, 58 stocks. CV: combinatorial purged CV (6 groups, 15 splits, purge + embargo = h) on earlier data.
+- Every published target is at the smallest distance, k = 0.5 (0.6% to 2.2% from the close on test). Larger k never reached 80% on CV.
+- The model beats the same-distance baseline (CI above zero at 1 day and 2 weeks), but by less than the 80% bar needs.
+- CV win rates are optimistic: thresholds were picked on the same out-of-fold rows. On test, coverage rose and win rates fell.
+- "Close within ±X of the predicted price" and "close inside the predicted range" have no edge over same-distance or same-width baselines.
+- A forward test now logs each day's targets before the outcome is known (`scripts/targets_forward.py`).
+
+Code: `scripts/targets_run.py`, `src/targets/`. Full tables: `results/targets/RESULTS.md`.
+
+### Pipeline Latency Benchmark
+
+Measured with `scripts/benchmark_pipeline.py` (cached offline run on 2026-10-27; Intel64 Family 6 Model 142 Stepping 9, GenuineIntel, 4 logical CPUs, Windows 10):
+
+| Path | Samples (n) | Median p50 (s) | p95 (s) |
+|---|---|---|---|
+| Cold (model cache empty) | 5 | 0.41 s | 0.67 s |
+| Warm (model cache populated) | 5 | 0.20 s | 0.21 s |
+
+Median speed-up from caching: 2.0x. Raw data saved in `results/benchmark_pipeline.json` and latest latency run.
 
 **Backtest Metrics:**
 - Total Return (%)
@@ -255,3 +325,7 @@ B.Tech + M.Tech | AI & Data Science | DAVV, Indore
 ---
 
 ⭐ Star this repo if you find it useful!
+
+---
+
+<div align="center"><sub>Built by <a href="https://github.com/Mokshitsharma">Mokshit Sharma</a> · <a href="https://mokshitsharma27.vercel.app/">Portfolio</a> · <a href="https://www.linkedin.com/in/mokshit-sharma-75b5ab305">LinkedIn</a></sub></div>

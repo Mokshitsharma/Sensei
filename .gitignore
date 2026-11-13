@@ -31,3 +31,38 @@ Thumbs.db
 # Local SQLite persistence (prediction-accuracy log, paper trading)
 data/sensei.db
 data/sensei.db-*
+# DuckDB market-data warehouse (rebuilt by scripts/ingest.py)
+data/*.duckdb
+data/*.duckdb.wal
+# Test / results artefacts
+.coverage
+coverage.xml
+htmlcov/
+results/**/items.jsonl
+results/**/*.parquet
+results/index.sqlite
+!.env.example
+infra/.terraform/
+*.tfstate
+*.tfstate.*
+# Security hardening
+*.pem
+*.key
+serviceAccountKey.json
+google-services.json
+GoogleService-Info.plist
+firebase-applet-config.json
+venv/
+dist/
+build/
+*.db
+*.sqlite
+*.pt
+*.pkl
+*.joblib
+*.h5
+*.onnx
+*.zip
+
+# private working notes
+brain/
